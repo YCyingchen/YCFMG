@@ -40,8 +40,7 @@ h2{font-size:18px;margin:34px 0 14px}
 .feat li{margin:4px 0}
 ol{padding-left:20px}ol li{margin:6px 0;font-size:13.5px}
 code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:2px 6px;font-size:12.5px}
-.changelog h3{margin:0 0 8px;font-size:15px}
-.changelog ul{margin:0 0 16px;padding-left:18px;color:var(--muted);font-size:13px}
+
 footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);font-size:12.5px;text-align:center}
 /* 预览图灯箱（含缩放） */
 .shot img{cursor:zoom-in}
@@ -61,6 +60,20 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
 .lb .cap{position:absolute;left:0;right:0;bottom:26px;text-align:center;color:#ddd;font-size:13px;pointer-events:none}
 .lb .idx{position:absolute;top:20px;left:20px;color:#ddd;font-size:13px}
 .lb .hint{position:absolute;top:20px;left:50%;transform:translateX(-50%);color:#9aa;font-size:12px}
+/* 更新记录：折叠 */
+.changelog{padding:8px 20px}
+.ver{border-bottom:1px solid var(--line)}
+.ver:last-child{border-bottom:0}
+.ver>summary{display:flex;align-items:center;gap:9px;padding:13px 0;cursor:pointer;font-weight:600;font-size:14.5px;list-style:none;user-select:none}
+.ver>summary::-webkit-details-marker{display:none}
+.ver>summary::before{content:"\25B8";color:var(--muted);font-size:12px;transition:transform .15s ease}
+.ver[open]>summary::before{transform:rotate(90deg)}
+.ver>summary:hover{color:var(--accent)}
+.ver .date{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--muted)}
+.ver ul{margin:0 0 14px;padding-left:32px;color:var(--muted);font-size:13px}
+.ver li{margin:5px 0}
+.badge-new{padding:2px 9px;border-radius:999px;background:var(--accent);color:#fff;font-size:11px;font-weight:500}
+.ver-note{color:var(--muted);font-size:12.5px;padding:2px 0 14px}
 </style>
 </head>
 <body>
@@ -146,28 +159,83 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
 
   <h2>更新记录</h2>
   <div class="card changelog">
-    <h3>fmg2609.011</h3>
-    <ul>
-      <li>下载页预览图支持点击放大查看（灯箱，可左右切换、Esc 关闭）</li>
-    </ul>
-    <h3>fmg2609.005</h3>
-    <ul>
-      <li>文件管理界面按 Windows 资源管理器重做：地址行、命令栏、行内操作</li>
-      <li>图库的分类与色调筛选合并到工具栏，不再占用内容区</li>
-      <li>取消登录：安装后直接进入，无需输入账号密码</li>
-      <li>修复文件大小显示异常与图标尺寸问题</li>
-      <li>仅保留飞牛 fpk 一种分发形式</li>
-    </ul>
-    <h3>fmg2609.003 - 004</h3>
-    <ul>
-      <li>修复安装后无法登录的问题</li>
-      <li>安装参数写入日志，便于排查</li>
-    </ul>
-    <h3>fmg2609.001 - 002</h3>
-    <ul>
-      <li>首个版本：文件管理 + 智能图库、以图搜图、以文搜图、分享页</li>
-      <li>桌面入口与应用图标</li>
-    </ul>
+    <p class="ver-note">点击版本号可展开该版本的更新内容。</p>
+
+    <details class="ver" open>
+      <summary>fmg2609.011 <span class="badge-new">最新</span><span class="date">2026-09-30</span></summary>
+      <ul>
+        <li>修复应用中心点图标页内打开白屏：桌面入口端口固定为 8686（此前残留的向导占位符无人替换）</li>
+        <li>新增分享专用端口：只提供分享页与静态资源，文件管理器的接口一律返回 404，默认关闭</li>
+        <li>页面与脚本禁用缓存，升级后不再出现新旧资源不匹配</li>
+      </ul>
+    </details>
+
+    <details class="ver">
+      <summary>fmg2609.010<span class="date">2026-09-30</span></summary>
+      <ul>
+        <li>HTML / JS / CSS 改为不缓存，避免升级后浏览器仍在用旧脚本导致白屏</li>
+      </ul>
+    </details>
+
+    <details class="ver">
+      <summary>fmg2609.009<span class="date">2026-09-30</span></summary>
+      <ul>
+        <li>清除下载页中关于安装向导的描述（安装过程无需任何配置）</li>
+      </ul>
+    </details>
+
+    <details class="ver">
+      <summary>fmg2609.008<span class="date">2026-09-30</span></summary>
+      <ul>
+        <li>去掉安装向导：安装后开箱即用，不再弹任何表单</li>
+        <li>预览图灯箱支持滚轮缩放、双击放大、放大后拖动</li>
+      </ul>
+    </details>
+
+    <details class="ver">
+      <summary>fmg2609.007<span class="date">2026-09-30</span></summary>
+      <ul>
+        <li>预览图支持点击放大查看（灯箱，支持左右切换与 Esc 关闭）</li>
+      </ul>
+    </details>
+
+    <details class="ver">
+      <summary>fmg2609.006<span class="date">2026-09-30</span></summary>
+      <ul>
+        <li>整理下载页更新记录，补充灯箱条目</li>
+      </ul>
+    </details>
+
+    <details class="ver">
+      <summary>fmg2609.005<span class="date">2026-09-30</span></summary>
+      <ul>
+        <li>文件管理界面按 Windows 资源管理器重做：地址行、命令栏、行内操作、四种视图</li>
+        <li>图库的分类与色调筛选合并到工具栏，不再占用内容区</li>
+        <li>取消登录：安装后直接进入，无需输入账号密码</li>
+        <li>修复文件大小显示异常与图标尺寸问题</li>
+        <li>仅保留飞牛 fpk 一种分发形式</li>
+      </ul>
+    </details>
+
+    <details class="ver">
+      <summary>fmg2609.003 - 004<span class="date">2026-09-30</span></summary>
+      <ul>
+        <li>修复安装后无法登录的问题（环境变量未导出、特殊字符转义）</li>
+        <li>修正改用户名后账号未创建、一次性重置标记失效</li>
+        <li>安装参数写入日志，便于排查</li>
+        <li>Docker Compose 示例补齐中文注释</li>
+      </ul>
+    </details>
+
+    <details class="ver">
+      <summary>fmg2609.001 - 002<span class="date">2026-09-30</span></summary>
+      <ul>
+        <li>首个版本：文件管理 + 智能图库、以图搜图、以文搜图、自动分类标签</li>
+        <li>专属分享页与多域名绑定、在线更新检查（下载站 / GitHub / Docker Hub）</li>
+        <li>飞牛 fpk 打包与应用图标、桌面入口</li>
+        <li>新增 scripts/bump-version.sh：每次修改自动同步版本号</li>
+      </ul>
+    </details>
   </div>
 </main>
 
