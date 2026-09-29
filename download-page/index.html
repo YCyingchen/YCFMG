@@ -129,17 +129,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
     <li>首次登录使用 <code>admin</code>，初始密码在应用日志（应用中心 → 日志，或 <code>应用数据目录/info.log</code>）中查看，并请立即修改。</li>
   </ol>
 
-  <h2 id="install-docker">Docker 运行</h2>
-<pre><code>docker run -d --name ycfmg \
-  -p 8686:8686 \
-  -e YCFMG_ADMIN_PASSWORD="你的强密码" \
-  -e YCFMG_PUBLIC_URLS="http://192.168.1.8:8686,https://fm.example.com" \
-  -v /vol1/1000/Photos:/data/photos \
-  -v /vol1/1000/ycfmg:/config \
-  --restart unless-stopped \
-  ycyingchen/ycfmg:fmg2609.001</code></pre>
-
-  <h2>功能特性</h2>
+  <h2 id="install-docker">Docker 部署</h2><p>新建一个目录，放入 `docker-compose.yml`，然后执行 `docker compose up -d`。</p><pre><code>services:  ycfmg:    image: ycyingchen/ycfmg:fmg2609.001    container_name: ycfmg    restart: unless-stopped    ports:      - "8686:8686"    environment:      TZ: Asia/Shanghai      YCFMG_ADMIN_PASSWORD: "改成你的密码"      YCFMG_PUBLIC_URLS: "http://192.168.1.8:8686"    volumes:      - ./config:/config      - /vol1/1000:/data</code></pre><p>启动后访问 `http://设备IP:8686`，账号 `admin`，密码为上面填写的值。</p><h2>功能特性</h2>
   <div class="grid">
     <div class="card">
       <h3>Windows 式文件管理</h3>

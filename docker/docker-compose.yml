@@ -1,18 +1,21 @@
+# YCFMG 文件管理 + 智能图库
+# 用法：docker compose up -d
 services:
   ycfmg:
     image: ycyingchen/ycfmg:fmg2609.001
     container_name: ycfmg
     restart: unless-stopped
     ports:
-      - "8686:8686"
+      - "8686:8686"              # 左边可改成别的端口，如 "9000:8686"
     environment:
       TZ: Asia/Shanghai
-      YCFMG_ADMIN_PASSWORD: "改成你的密码"
+      YCFMG_ADMIN_PASSWORD: "改成你的密码"   # 首次启动的管理员密码
+      # 绑定域名：访问者用哪个域名进来，分享链接就用哪个域名生成
       YCFMG_PUBLIC_URLS: "http://192.168.1.8:8686"
     volumes:
-      - ./config:/config
-      - /vol1/1000/Photos:/data/photos
-      - /vol1/1000/Downloads:/data/downloads
+      - ./config:/config         # 配置与数据库（务必保留）
+      - /vol1/1000:/data         # 要管理的文件目录，可挂多个
+      # - /vol5/1000/空间4:/media  再加一个目录就复制这一行
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8686/api/health"]
       interval: 30s
