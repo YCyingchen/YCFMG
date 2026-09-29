@@ -1,0 +1,11 @@
+#!/bin/bash
+# 安装后回调：初始化数据目录与默认配置
+set -u
+APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+mkdir -p "$APP_DIR/data" "$APP_DIR/etc" "$APP_DIR/data/thumbs"
+if [ ! -f "$APP_DIR/etc/config.yaml" ] && [ -f "$APP_DIR/etc/config.example.yaml" ]; then
+  cp "$APP_DIR/etc/config.example.yaml" "$APP_DIR/etc/config.yaml"
+fi
+chmod +x "$APP_DIR/bin/ycfmg" 2>/dev/null || true
+echo "YCFMG 安装完成，首次启动后请查看日志中的初始密码。"
+exit 0

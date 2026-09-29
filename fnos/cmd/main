@@ -1,0 +1,61 @@
+#!/bin/bash
+# YCFMG 生命周期控制脚本（fnOS / 通用 Linux）
+set -u
+
+APP_NAME="ycfmg"
+APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BIN="$APP_DIR/bin/ycfmg"
+CFG="$APP_DIR/etc/config.yaml"
+DATA="$APP_DIR/data"
+PIDFILE="$DATA/ycfmg.pid"
+LOGFILE="$DATA/ycfmg.log"
+PORT="${YCFMG_PORT:-8686}"
+
+mkdir -p "$DATA" "$APP_DIR/etc"
+
+start() {
+  if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+    echo "YCFMG 已在运行 (pid $(cat "$PIDFILE"))"
+    return 0
+  fi
+  if [ ! -f "$CFG" ]; then
+    "$BIN" --config "$CFG" >/dev/null 2>&1 &
+    sleep 1
+    kill %1 2>/dev/null || true
+  fi
+  nohup "$BIN" --config "$CFG" --data "$DATA" >"$LOGFILE" 2>&1 &
+  echo $! > "$PIDFILE"
+  echo "YCFMG 已启动 (pid $(cat "$PIDFILE"), 端口 $PORT)"
+}
+
+stop() {
+  if [ -f "$PIDFILE" ]; then
+    PID="$(cat "$PIDFILE")"
+    if kill -0 "$PID" 2>/dev/null; then
+      kill "$PID"
+      for i in 1 2 3 4 5 6 7 8 9 10; do
+        kill -0 "$PID" 2>/dev/null || break
+        sleep 1
+      done
+      kill -9 "$PID" 2>/dev/null || true
+    fi
+    rm -f "$PIDFILE"
+  fi
+  echo "YCFMG 已停止"
+}
+
+status() {
+  if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+    echo "running"
+  else
+    echo "stopped"
+  fi
+}
+
+case "${1:-}" in
+  start) start ;;
+  stop) stop ;;
+  restart) stop; sleep 1; start ;;
+  status) status ;;
+  *) echo "用法: $0 {start|stop|restart|status}"; exit 1 ;;
+esac

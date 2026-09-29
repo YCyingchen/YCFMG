@@ -1,0 +1,23 @@
+{
+  "appname": "ycfmg",
+  "version": "fmg2609.001",
+  "display_name": "YCFMG",
+  "desc": "文件管理 + 智能图库：以图搜图、以文搜图、专属分享页与多域名绑定",
+  "changelog": "1. 文件管理器与图库合一\n2. 感知哈希以图搜图与中文以文搜图\n3. 专属分享页、多域名绑定与访问统计\n4. 支持飞牛 NAS / 通用 NAS / VPS / Docker",
+  "author": "ycyingchen",
+  "maintainer": "ycyingchen",
+  "license": "MIT",
+  "platform": "x86_64",
+  "arch": ["x86_64", "arm64"],
+  "os_min_version": "0.8.0",
+  "os_max_version": "",
+  "source": "thirdparty",
+  "install_type": "auto",
+  "service_port": "8686",
+  "ctl_script": "cmd/main",
+  "post_install": "cmd/install_callback",
+  "post_upgrade": "cmd/upgrade_callback",
+  "pre_uninstall": "cmd/uninstall_callback",
+  "desktop_uidir": "",
+  "desktop_applaunchname": ""
+}

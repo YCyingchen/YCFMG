@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>YCFMG · 文件管理 + 智能图库</title>
+<link rel="icon" href="img/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-fwd" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="currentColor"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6z" fill="currentColor" opacity=".85"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="currentColor" opacity=".8"/><circle cx="9" cy="10" r="2" fill="#fff"/><path d="M5 18l5-6 4 4 2-2 3 4z" fill="#fff"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 17V5M7 10l5-5 5 5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" fill="currentColor"/><circle cx="6" cy="12" r="3" fill="currentColor"/><circle cx="18" cy="19" r="3" fill="currentColor"/><path d="M8.6 10.6l6.8-4M8.6 13.4l6.8 4" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1" fill="currentColor"/><rect x="13" y="4" width="7" height="7" rx="1" fill="currentColor"/><rect x="4" y="13" width="7" height="7" rx="1" fill="currentColor"/><rect x="13" y="13" width="7" height="7" rx="1" fill="currentColor"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-detail" viewBox="0 0 24 24"><path d="M4 6h6M4 12h6M4 18h6M14 6h6M14 12h6M14 18h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 6 6.3.6-4.8 4.1 1.5 6.3L12 16.8 6.3 20l1.5-6.3L3 9.6 9.3 9z" fill="currentColor"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 4.1a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 11a2 2 0 1 1 0 4 1.7 1.7 0 0 0-1.6 1z" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></symbol>
+</svg>
+
+<div id="loginView" class="login-wrap">
+  <form class="login-card" id="loginForm">
+    <div class="login-logo"><img src="img/logo.svg" alt="YCFMG"></div>
+    <h1 id="loginBrand">YCFMG</h1>
+    <p id="loginSub">文件管理 · 智能图库</p>
+    <label>账号<input id="loginUser" value="admin" autocomplete="username"></label>
+    <label>密码<input id="loginPass" type="password" autocomplete="current-password" autofocus></label>
+    <div class="login-err" id="loginErr"></div>
+    <button class="btn primary lg" type="submit">登录</button>
+  </form>
+</div>
+
+<div id="app" class="app hidden">
+  <header class="titlebar">
+    <div class="tb-left">
+      <img class="tb-logo" src="img/logo.svg" alt="">
+      <span class="tb-name">YCFMG</span>
+      <nav class="menubar" id="menubar">
+        <button data-menu="file">文件</button>
+        <button data-menu="edit">编辑</button>
+        <button data-menu="view">视图</button>
+        <button data-menu="tools">工具</button>
+      </nav>
+    </div>
+    <div class="tb-center">
+      <div class="searchbox">
+        <svg class="ic"><use href="#i-search"/></svg>
+        <input id="globalSearch" placeholder="搜索文件、图片、标签、相机，或拖入一张图以图搜图">
+        <span class="search-kind" id="searchKind">以文搜图</span>
+      </div>
+    </div>
+    <div class="tb-right">
+      <button class="icon-btn" id="btnTheme" title="切换主题"><svg><use href="#i-eye"/></svg></button>
+      <button class="icon-btn" id="btnSettings" title="设置"><svg><use href="#i-settings"/></svg></button>
+      <div class="user-chip" id="userChip">admin</div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="tb-group">
+      <button class="icon-btn" id="tbBack" title="后退"><svg><use href="#i-back"/></svg></button>
+      <button class="icon-btn" id="tbFwd" title="前进"><svg><use href="#i-fwd"/></svg></button>
+      <button class="icon-btn" id="tbUp" title="上一级"><svg><use href="#i-up"/></svg></button>
+      <button class="icon-btn" id="tbRefresh" title="刷新"><svg><use href="#i-refresh"/></svg></button>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-group">
+      <button class="icon-btn" id="tbNew" title="新建文件夹"><svg><use href="#i-plus"/></svg></button>
+      <button class="icon-btn" id="tbUpload" title="上传"><svg><use href="#i-upload"/></svg></button>
+      <button class="icon-btn" id="tbDownload" title="下载"><svg><use href="#i-download"/></svg></button>
+      <button class="icon-btn" id="tbShare" title="分享"><svg><use href="#i-share"/></svg></button>
+      <button class="icon-btn" id="tbDelete" title="删除"><svg><use href="#i-trash"/></svg></button>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-group" id="viewSwitch">
+      <button class="icon-btn" data-view="icons" title="大图标"><svg><use href="#i-grid"/></svg></button>
+      <button class="icon-btn" data-view="list" title="列表"><svg><use href="#i-list"/></svg></button>
+      <button class="icon-btn" data-view="details" title="详细信息"><svg><use href="#i-detail"/></svg></button>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-group">
+      <select id="sortSelect" class="mini-select">
+        <option value="name">名称</option>
+        <option value="taken">拍摄时间</option>
+        <option value="mtime">修改时间</option>
+        <option value="size">大小</option>
+        <option value="type">类型</option>
+        <option value="rating">评分</option>
+      </select>
+      <button class="icon-btn" id="sortDir" title="排序方向">↓</button>
+    </div>
+    <div class="tb-fill"></div>
+    <div class="tb-group">
+      <button class="chip-btn" id="btnIndex">立即索引</button>
+      <span class="index-state" id="indexState"></span>
+    </div>
+  </div>
+
+  <div class="addressbar">
+    <button class="crumbs-toggle" id="crumbsToggle" title="展开路径">›</button>
+    <div class="crumbs" id="crumbs"></div>
+    <input class="addr-input hidden" id="addrInput" spellcheck="false">
+  </div>
+
+  <div class="body">
+    <aside class="nav" id="nav">
+      <div class="nav-section">
+        <div class="nav-title">快速访问</div>
+        <div class="nav-item" data-route="#/gallery"><svg class="nic"><use href="#i-image"/></svg><span>图库</span></div>
+        <div class="nav-item" data-route="#/files" data-path=""><svg class="nic"><use href="#i-folder"/></svg><span>此设备</span></div>
+        <div class="nav-item" data-route="#/search"><svg class="nic"><use href="#i-search"/></svg><span>搜索中心</span></div>
+        <div class="nav-item" data-route="#/shares"><svg class="nic"><use href="#i-share"/></svg><span>分享管理</span></div>
+        <div class="nav-item" data-route="#/trash"><svg class="nic"><use href="#i-trash"/></svg><span>回收站</span></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">图库分类</div>
+        <div id="navClasses"></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">文件库</div>
+        <div id="navLibs"></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">标签</div>
+        <div id="navTags"></div>
+      </div>
+    </aside>
+
+    <main class="content" id="content">
+      <div id="viewExplorer" class="view"></div>
+      <div id="viewGallery" class="view hidden"></div>
+      <div id="viewSearch" class="view hidden"></div>
+      <div id="viewShares" class="view hidden"></div>
+      <div id="viewSettings" class="view hidden"></div>
+      <div id="viewTrash" class="view hidden"></div>
+      <div id="dropHint" class="drop-hint hidden">松开以移动到此文件夹</div>
+    </main>
+
+    <aside class="details" id="details">
+      <div class="details-head">详细信息</div>
+      <div class="details-body" id="detailsBody">
+        <div class="empty-tip">选择文件或图片查看详情</div>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="statusbar">
+    <span id="statusLeft">就绪</span>
+    <span class="fill"></span>
+    <span id="statusRight"></span>
+  </footer>
+</div>
+
+<div id="ctxMenu" class="ctxmenu hidden"></div>
+<div id="toast" class="toast"></div>
+<div id="modal" class="modal-wrap hidden"><div class="modal" id="modalBox"></div></div>
+<div id="lightbox" class="lightbox hidden">
+  <div class="lb-bar">
+    <span id="lbTitle"></span>
+    <span class="fill"></span>
+    <button class="btn" id="lbPrev">上一张</button>
+    <button class="btn" id="lbNext">下一张</button>
+    <a class="btn" id="lbDownload" href="#">下载</a>
+    <button class="btn" id="lbInfo">信息</button>
+    <button class="btn" id="lbClose">关闭</button>
+  </div>
+  <div class="lb-body" id="lbBody"><img id="lbImg" src="" alt=""></div>
+</div>
+
+<input type="file" id="filePicker" multiple hidden>
+<input type="file" id="dirPicker" webkitdirectory directory multiple hidden>
+<input type="file" id="imagePicker" accept="image/*" hidden>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/views.js"></script>
+<script src="js/explorer.js"></script>
+<script src="js/gallery.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

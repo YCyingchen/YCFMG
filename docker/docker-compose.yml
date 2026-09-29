@@ -1,0 +1,20 @@
+services:
+  ycfmg:
+    image: ycyingchen/ycfmg:fmg2609.001
+    container_name: ycfmg
+    restart: unless-stopped
+    ports:
+      - "8686:8686"
+    environment:
+      TZ: Asia/Shanghai
+      YCFMG_ADMIN_PASSWORD: "改成你的密码"
+      YCFMG_PUBLIC_URLS: "http://192.168.1.8:8686"
+    volumes:
+      - ./config:/config
+      - /vol1/1000/Photos:/data/photos
+      - /vol1/1000/Downloads:/data/downloads
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8686/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

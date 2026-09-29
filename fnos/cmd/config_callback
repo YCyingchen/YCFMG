@@ -1,0 +1,5 @@
+#!/bin/bash
+# 配置读取回调：返回应用当前监听端口
+set -u
+echo "${YCFMG_PORT:-8686}"
+exit 0
