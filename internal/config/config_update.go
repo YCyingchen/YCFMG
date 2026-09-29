@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"os"
 	"strings"
 )
@@ -98,6 +99,14 @@ func (c *Config) applyUpdateEnv() {
 		for i := range c.Update.Sources {
 			if c.Update.Sources[i].Proxy == "" {
 				c.Update.Sources[i].Proxy = v
+			}
+		}
+	}
+	if v := os.Getenv("YCFMG_UPDATE_PROXY_B64"); v != "" {
+		if raw, derr := base64.StdEncoding.DecodeString(v); derr == nil {
+			c.Update.Proxy = string(raw)
+			for i := range c.Update.Sources {
+				c.Update.Sources[i].Proxy = string(raw)
 			}
 		}
 	}

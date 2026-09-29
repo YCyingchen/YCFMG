@@ -6,6 +6,7 @@ LOG_FILE="${TRIM_PKGVAR}/info.log"
 PID_FILE="${TRIM_PKGVAR}/app.pid"
 BIN="${TRIM_APPDEST}/bin/ycfmg"
 CFG="${TRIM_PKGETC}/config.yaml"
+ENVF="${TRIM_PKGETC}/app.env"
 VAR="${TRIM_PKGVAR}"
 PORT="${TRIM_SERVICE_PORT:-8686}"
 
@@ -13,22 +14,22 @@ log_msg() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "${LOG_FILE}"
 }
 
+# 读取安装向导/应用设置写入的环境文件；必须 export 才能传给应用进程
 load_env() {
-	if [ -f "${TRIM_PKGETC}/app.env" ]; then
-		. "${TRIM_PKGETC}/app.env"
-		PORT="${YCFMG_PORT:-${PORT}}"
-	fi
+    if [ -f "${ENVF}" ]; then
+        set -a
+        . "${ENVF}"
+        set +a
+        PORT="${YCFMG_PORT:-${PORT}}"
+    fi
 }
 
 prepare() {
     mkdir -p "${TRIM_PKGVAR}" "${TRIM_PKGETC}" "${TRIM_PKGVAR}/thumbs" 2>/dev/null
-    if [ ! -f "${CFG}" ]; then
-        if [ -f "${TRIM_APPDEST}/etc/config.example.yaml" ]; then
-            cp "${TRIM_APPDEST}/etc/config.example.yaml" "${CFG}"
-            sed -i "s|^  port:.*|  port: ${PORT}|" "${CFG}"
-            sed -i "s|^data_dir:.*|data_dir: ${VAR}|" "${CFG}"
-            log_msg "已生成默认配置 ${CFG}"
-        fi
+    if [ ! -f "${CFG}" ] && [ -f "${TRIM_APPDEST}/etc/config.example.yaml" ]; then
+        cp "${TRIM_APPDEST}/etc/config.example.yaml" "${CFG}"
+        sed -i "0,/^  port:/s|^  port:.*|  port: ${PORT}|" "${CFG}"
+        sed -i "s|^data_dir:.*|data_dir: ${VAR}|" "${CFG}"
     fi
     chmod +x "${BIN}" 2>/dev/null
 }
@@ -60,7 +61,11 @@ start_process() {
     echo $! > "${PID_FILE}"
     sleep 2
     if is_running; then
-        log_msg "启动成功 pid=$(cat ${PID_FILE})"
+        log_msg "启动成功 pid=$(cat "${PID_FILE}")"
+        # 一次性标记：安装向导/设置页提交的密码只需重置一次，避免覆盖用户在应用内改的密码
+        if [ -f "${ENVF}" ]; then
+            sed -i "s|^YCFMG_ADMIN_FORCE=1|YCFMG_ADMIN_FORCE=0|" "${ENVF}" 2>/dev/null
+        fi
         return 0
     fi
     log_msg "启动失败，请查看 ${LOG_FILE}"

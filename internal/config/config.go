@@ -3,6 +3,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -278,11 +279,21 @@ func (c *Config) applyEnv() {
 	if v := os.Getenv("YCFMG_PUBLIC_URLS"); v != "" {
 		c.Server.PublicURLs = splitCSV(v)
 	}
+	if v := os.Getenv("YCFMG_PUBLIC_URLS_B64"); v != "" {
+		if raw, derr := base64.StdEncoding.DecodeString(v); derr == nil {
+			c.Server.PublicURLs = splitCSV(string(raw))
+		}
+	}
 	if v := os.Getenv("YCFMG_ADMIN_USER"); v != "" {
 		c.Auth.Username = v
 	}
 	if v := os.Getenv("YCFMG_ADMIN_PASSWORD"); v != "" {
 		c.Auth.Password = v
+	}
+	if v := os.Getenv("YCFMG_ADMIN_PASSWORD_B64"); v != "" {
+		if raw, derr := base64.StdEncoding.DecodeString(v); derr == nil {
+			c.Auth.Password = string(raw)
+		}
 	}
 	if v := os.Getenv("YCFMG_LOG_LEVEL"); v != "" {
 		c.LogLevel = v

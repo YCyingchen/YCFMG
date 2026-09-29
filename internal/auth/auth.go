@@ -4,6 +4,7 @@ package auth
 import (
 	"errors"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -36,6 +37,15 @@ func (m *Manager) EnsureAdmin() (string, error) {
 		username = "admin"
 	}
 	if m.st.CountUsers() > 0 {
+		// 安装向导或应用设置提供了新密码时，按标记重置一次
+		if os.Getenv("YCFMG_ADMIN_FORCE") == "1" && strings.TrimSpace(m.cfg.Auth.Password) != "" {
+			hash, herr := bcrypt.GenerateFromPassword([]byte(m.cfg.Auth.Password), bcrypt.DefaultCost)
+			if herr == nil {
+				if uerr := m.st.UpdateUserPassword(username, string(hash)); uerr == nil {
+					logx.Infof("已按安装向导或应用设置重置管理员 %s 的密码", username)
+				}
+			}
+		}
 		return "", nil
 	}
 	pwd := strings.TrimSpace(m.cfg.Auth.Password)

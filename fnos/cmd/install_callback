@@ -1,5 +1,5 @@
 #!/bin/bash
-# 安装后回调：把安装向导中填写的值落地为配置与环境文件
+# 安装后回调：把安装向导中填写的账号、密码、端口、代理、域名落地
 set -u
 BIN="${TRIM_APPDEST}/bin/ycfmg"
 ETC="${TRIM_PKGETC}"
@@ -12,6 +12,24 @@ USER_PASS="${wizard_password:-}"
 PORT="${wizard_port:-${TRIM_SERVICE_PORT:-8686}}"
 PROXY="${wizard_proxy:-}"
 URLS="${wizard_public_urls:-}"
+
+
+# 公共函数：base64 写入环境文件，避免密码里的特殊字符被 shell 解释
+b64() { printf '%s' "$1" | base64 | tr -d '\n'; }
+
+write_env() {
+    local f="$1" user="$2" pass="$3" port="$4" proxy="$5" urls="$6" force="$7"
+    {
+        echo "# 由飞牛安装向导 / 应用设置生成，请勿手工修改"
+        echo "YCFMG_PORT=\"${port}\""
+        echo "YCFMG_ADMIN_USER=\"${user}\""
+        [ -n "${pass}" ] && echo "YCFMG_ADMIN_PASSWORD_B64=\"$(b64 "${pass}")\""
+        [ -n "${proxy}" ] && echo "YCFMG_UPDATE_PROXY_B64=\"$(b64 "${proxy}")\""
+        [ -n "${urls}" ] && echo "YCFMG_PUBLIC_URLS_B64=\"$(b64 "${urls}")\""
+        echo "YCFMG_ADMIN_FORCE=\"${force}\""
+    } > "${f}"
+    chmod 600 "${f}"
+}
 
 mkdir -p "${ETC}" "${VAR}/thumbs" "${TRIM_PKGHOME}" 2>/dev/null
 chmod +x "${BIN}" 2>/dev/null
@@ -31,16 +49,8 @@ if [ -f "${CFG}" ]; then
     fi
 fi
 
-# 运行时用环境变量注入（不把密码写进 config.yaml）
-{
-    echo "# 由安装向导生成，请勿手工修改（应用设置中可改）"
-    echo "YCFMG_PORT=\"${PORT}\""
-    echo "YCFMG_ADMIN_USER=\"${USER_NAME}\""
-    if [ -n "${USER_PASS}" ]; then echo "YCFMG_ADMIN_PASSWORD=\"${USER_PASS}\""; fi
-    if [ -n "${PROXY}" ]; then echo "YCFMG_UPDATE_PROXY=\"${PROXY}\""; fi
-    if [ -n "${URLS}" ]; then echo "YCFMG_PUBLIC_URLS=\"${URLS}\""; fi
-} > "${ENVF}"
-chmod 600 "${ENVF}"
+# 写入运行环境（密码 base64；FORCE=1 表示启动时按向导值设置/重置管理员密码）
+write_env "${ENVF}" "${USER_NAME}" "${USER_PASS}" "${PORT}" "${PROXY}" "${URLS}" "1"
 
 echo "YCFMG 安装完成：账号 ${USER_NAME}，端口 ${PORT}"
 echo "配置：${CFG}"

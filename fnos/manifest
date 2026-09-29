@@ -1,5 +1,5 @@
 appname          = ycfmg
-version          = fmg2609.002
+version          = fmg2609.003
 display_name     = YCFMG 文件管理 · 智能图库
 desc             = 文件管理与智能图库合一的私有云应用：真实目录零搬迁、以图搜图、以文搜图、自动分类标签、专属分享页与多域名绑定。
 platform         = x86
