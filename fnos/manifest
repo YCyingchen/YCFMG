@@ -12,3 +12,5 @@ os_min_version   = 0.8.0
 ctl_stop         = true
 service_port     = 8686
 checkport        = true
+desktop_uidir         = ui
+desktop_applaunchname = ycfmg.main

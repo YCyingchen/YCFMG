@@ -1,0 +1,13 @@
+{
+  ".url": {
+    "ycfmg.main": {
+      "title": "YCFMG 文件管理 · 智能图库",
+      "icon": "images/icon_{0}.png",
+      "type": "iframe",
+      "protocol": "http",
+      "port": "8686",
+      "url": "/",
+      "allUsers": true
+    }
+  }
+}

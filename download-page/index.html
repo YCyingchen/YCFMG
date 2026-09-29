@@ -127,26 +127,30 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
     <li>打开飞牛 NAS →「应用中心」→「手动安装」，选择该 fpk 文件；</li>
     <li>安装完成后在应用中心启动，浏览器访问 <code>http://设备IP:8686</code>；</li>
     <li>首次登录使用 <code>admin</code>，初始密码在应用日志（应用中心 → 日志，或 <code>应用数据目录/info.log</code>）中查看，并请立即修改。</li>
+<p>安装后在飞牛「应用中心」点击 YCFMG 图标即可在桌面窗口内直接打开，无需手动输入地址。</p>
+
   </ol>
 
-    <h2 id="install-docker">Docker 部署</h2>
-  <p>新建一个目录，放入下面的 <code>docker-compose.yml</code>，然后执行 <code>docker compose up -d</code>。</p>
+      <h2 id="install-docker">Docker 部署（Compose）</h2>
+  <p>新建一个目录，放入下面的 <code>docker-compose.yml</code>，执行 <code>docker compose up -d</code> 即可。</p>
 <pre><code>services:
   ycfmg:
-    image: ycyingchen/ycfmg:fmg2609.001
-    container_name: ycfmg
-    restart: unless-stopped
+    image: ycyingchen/ycfmg:fmg2609.001   # 镜像，支持 amd64 / arm64
+    container_name: ycfmg                 # 容器名
+    restart: unless-stopped               # 开机自启
     ports:
-      - "8686:8686"
+      - "8686:8686"                       # 左边可改成别的端口，如 "9000:8686"
     environment:
-      TZ: Asia/Shanghai
-      YCFMG_ADMIN_PASSWORD: "改成你的密码"
-      YCFMG_UPDATE_PROXY: "http://192.168.1.8:7890"
+      TZ: Asia/Shanghai                   # 时区
+      YCFMG_ADMIN_PASSWORD: "改成你的密码"  # 管理员密码
+      YCFMG_UPDATE_PROXY: "http://192.168.1.8:7890"  # 在线更新用的代理，可留空
     volumes:
-      - ./config:/config
-      - /vol1/1000:/data</code></pre>
+      - ./config:/config                  # 配置与数据库，务必保留
+      - /vol1/1000:/data                  # 要管理的目录，可挂多个</code></pre>
   <p>访问 <code>http://设备IP:8686</code>，账号 <code>admin</code>，密码为上一步填写的值。</p>
-  <p>常用命令：<code>docker compose logs -f</code> 看日志，<code>docker compose down</code> 停止。</p>
+  <p>常用命令：<code>docker compose up -d</code> 启动，<code>docker compose logs -f</code> 看日志，<code>docker compose down</code> 停止。</p>
+
+  
   <h2 id="changelog">更新记录</h2>
   <div class="card">
     <h3>fmg2609.001 <span class="badge">最新</span></h3>
