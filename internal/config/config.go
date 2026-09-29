@@ -98,6 +98,7 @@ func Default() *Config {
 		Auth: Auth{
 			Username:        "admin",
 			SessionTTLHours: 72 * 24,
+			AllowGuest:      true,
 		},
 		Index: Index{
 			Enabled:             true,

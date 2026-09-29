@@ -88,6 +88,10 @@ func (s *Server) hLogout(w http.ResponseWriter, r *http.Request) {
 func (s *Server) hMe(w http.ResponseWriter, r *http.Request) {
 	sess := s.au.Current(r)
 	if sess == nil {
+		if s.cfg.Auth.AllowGuest {
+			okData(w, map[string]any{"username": "访客", "guest": true})
+			return
+		}
 		writeJSON(w, http.StatusUnauthorized, map[string]any{"ok": false, "error": "未登录"})
 		return
 	}

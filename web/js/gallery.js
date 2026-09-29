@@ -16,7 +16,7 @@
     loading: false
   };
 
-  function container() { return document.getElementById("viewGallery"); }
+  function container() { return document.getElementById("galRows"); }
 
   function params() {
     var p = { limit: state.limit, offset: state.offset, sort: state.sort, desc: state.desc ? 1 : "", kind: "image" };
@@ -64,6 +64,116 @@
     return head;
   }
 
+  // 筛选控件位于工具栏；这里只负责与之同步
+  function syncToolbar() {
+    var cs = document.getElementById("filterClassify");
+    var co = document.getElementById("filterColor");
+    var fb = document.getElementById("filterFav");
+    if (cs) { cs.value = state.filter.classify || ""; }
+    if (co) { co.value = state.filter.color || ""; }
+    if (fb) { fb.classList.toggle("on", !!state.filter.favorite); }
+  }
+
+  function bindToolbar() {
+    var cs = document.getElementById("filterClassify");
+    var co = document.getElementById("filterColor");
+    var fb = document.getElementById("filterFav");
+    var fc = document.getElementById("filterClear");
+    if (cs && !cs.dataset.bound) {
+      cs.dataset.bound = "1";
+      cs.onchange = function () { state.filter.classify = cs.value; reload(); };
+    }
+    if (co && !co.dataset.bound) {
+      co.dataset.bound = "1";
+      co.onchange = function () { state.filter.color = co.value; reload(); };
+    }
+    if (fb && !fb.dataset.bound) {
+      fb.dataset.bound = "1";
+      fb.onclick = function () { state.filter.favorite = state.filter.favorite ? "" : "true"; reload(); };
+    }
+    if (fc && !fc.dataset.bound) {
+      fc.dataset.bound = "1";
+      fc.onclick = function () {
+        state.filter = { classify: "", lib: "", color: "", year: "", favorite: "" };
+        state.query = "";
+        reload();
+      };
+    }
+    syncToolbar();
+  }
+  var COLOR_NAMES = {
+    "红": [345, 15], "橙": [15, 40], "黄": [40, 70], "绿": [70, 165],
+    "青": [165, 200], "蓝": [200, 255], "紫": [255, 290], "粉": [290, 345]
+  };
+
+  function colorNameOf(hex) {
+    if (!hex || hex.charAt(0) !== "#" || hex.length < 7) { return ""; }
+    var r = parseInt(hex.substr(1, 2), 16) / 255;
+    var g = parseInt(hex.substr(3, 2), 16) / 255;
+    var b = parseInt(hex.substr(5, 2), 16) / 255;
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    var v = mx, sat = mx === 0 ? 0 : (mx - mn) / mx;
+    if (v < 0.16) { return "黑色"; }
+    if (sat < 0.12) { return v > 0.85 ? "白色" : "灰色"; }
+    var h = 0;
+    if (mx !== mn) {
+      if (mx === r) { h = ((g - b) / (mx - mn)) % 6; }
+      else if (mx === g) { h = (b - r) / (mx - mn) + 2; }
+      else { h = (r - g) / (mx - mn) + 4; }
+      h = h * 60; if (h < 0) { h += 360; }
+    }
+    for (var k in COLOR_NAMES) {
+      var a = COLOR_NAMES[k][0], bb = COLOR_NAMES[k][1];
+      if (a > bb ? (h >= a || h < bb) : (h >= a && h < bb)) { return k + "色"; }
+    }
+    return "";
+  }
+
+  async function loadFilterOptions() {
+    try {
+      var d = await API.facets("image");
+      var cs = document.getElementById("filterClassify");
+      var co = document.getElementById("filterColor");
+      if (cs) {
+        var cur = cs.value;
+        cs.innerHTML = "<option value=\"\">全部分类</option>";
+        (d.classify || []).forEach(function (f) {
+          var o = document.createElement("option");
+          o.value = f.key; o.textContent = f.key + " (" + f.count + ")";
+          cs.appendChild(o);
+        });
+        cs.value = cur;
+      }
+      if (co) {
+        var cur2 = co.value, seen = {};
+        co.innerHTML = "<option value=\"\">全部色调</option>";
+        (d.color || []).forEach(function (f) {
+          var name = colorNameOf(f.key);
+          if (!name || seen[name]) { return; }
+          seen[name] = 1;
+          var o = document.createElement("option");
+          o.value = name; o.textContent = name;
+          co.appendChild(o);
+        });
+        co.value = cur2;
+      }
+    } catch (e) { }
+  }
+  function bindGalButtons() {
+    var d = document.getElementById("galDuplicate");
+    var ix = document.getElementById("galIndex");
+    if (d && !d.dataset.bound) {
+      d.dataset.bound = "1";
+      d.onclick = function () { if (window.App.showDuplicates) { window.App.showDuplicates(); } };
+    }
+    if (ix && !ix.dataset.bound) {
+      ix.dataset.bound = "1";
+      ix.onclick = function () {
+        var p = (Explorer && Explorer.state && Explorer.state.path) ? Explorer.state.path : "";
+        if (window.App.indexNow) { window.App.indexNow(p); }
+      };
+    }
+  }
   function groupByDay(items) {
     var map = {};
     var order = [];
@@ -114,9 +224,10 @@
   }
 
   function render() {
+    bindToolbar();
+    bindGalButtons();
     var c = container();
     c.innerHTML = "";
-    c.appendChild(chips());
     if (state.loading && !state.items.length) {
       var l = E("div", "empty-big");
       l.appendChild(E("div", null, "正在读取图库 ..."));
@@ -182,7 +293,7 @@
     state.loading = false;
   }
 
-  async function reload() { state.offset = 0; await fetchPage(); render(); }
+  async function reload() { state.offset = 0; await fetchPage(); await loadFilterOptions(); render(); }
 
   async function loadMore() {
     state.offset += state.limit;
@@ -193,6 +304,8 @@
       state.items = state.items.concat(more);
     } catch (e) { UI.toast(e.message); }
     state.loading = false;
+    var gc = document.getElementById("galCount");
+    if (gc) { gc.textContent = "共 " + state.total + " 张"; }
     render();
   }
 
@@ -243,6 +356,7 @@
   }
 
   window.Gallery = {
+    loadFilterOptions: loadFilterOptions,
     state: state,
     reload: reload,
     render: render,

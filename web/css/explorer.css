@@ -1,0 +1,561 @@
+/* YCNAS 文件管理页：Windows 11 资源管理器的外观。
+ *
+ * 只管这一个页面，类名统一 fx- 前缀，避免与 app.css / desk.css 撞名。
+ * 颜色一律走设计令牌：面板有三套风格（win11 / linux / router），
+ * 写死任何颜色在切风格时都会错位。
+ *
+ * 尺寸与层次对着 bin/ref/win11-explorer.png 量：标签条 40、地址行 44、
+ * 命令栏 48（上下各一条 1px 分隔线）、列头 32、数据行 34、状态栏 28。
+ */
+
+/* ---------- 外壳 ---------- */
+
+/* 
+/* ---------- 1. 标签条 ---------- */
+
+/* 整条是浅灰底，标签自己比它再亮一档、只有上方两个圆角，看起来是"从下面那一行
+ * 里立起来的"。 */
+.fx-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  flex: none;
+  height: 40px;
+  padding: 6px 8px 0;
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--line);
+}
+.fx-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 240px;
+  height: 32px;
+  padding: 0 6px 0 12px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: color-mix(in srgb, var(--ink) 4%, var(--surface));
+}
+.fx-tab > svg { color: var(--accent); flex: none; }
+.fx-tab-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
+
+/* 关闭叉平时不出现：一个只有单个目录的页面，那个叉看起来像"删掉这个目录"。
+ * 触屏没有 hover，只能用常显兜住。 */
+.fx-tab-close {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+}
+.fx-tab:hover .fx-tab-close, .fx-tab-close:focus-visible { opacity: 1; }
+.fx-tab-close:hover { background: var(--fx-hover); color: var(--ink); }
+@media (hover: none) { .fx-tab-close { opacity: 1; } }
+
+.fx-tab-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 2px;
+  flex: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.fx-tab-btn:hover { background: var(--fx-hover); color: var(--ink); }
+
+/* ---------- 2. 地址行 ---------- */
+
+.fx-addr { display: flex; align-items: center; gap: 10px; flex: none; height: 44px; padding: 0 10px; }
+
+.fx-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.fx-icon-btn:hover:not(:disabled) { background: var(--fx-hover); color: var(--ink); }
+.fx-icon-btn:disabled { opacity: .35; cursor: default; }
+/* 图标表里只有朝左的箭头（back），前进把同一个图标翻过来用。 */
+.fx-flip > svg { transform: rotate(180deg); }
+
+.fx-addr-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+}
+.fx-addr-field > svg { color: var(--muted); flex: none; }
+
+.fx-crumbs { display: flex; align-items: center; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.fx-crumbs::-webkit-scrollbar { display: none; }
+.fx-crumb {
+  flex: none;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.fx-crumb:hover { background: var(--fx-hover); }
+/* 段之间的分隔符比正文更淡，只是"这里断了一级"的提示。 */
+.fx-crumb-sep { flex: none; color: var(--muted); font-size: 11px; opacity: .7; }
+
+.fx-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 260px;
+  min-width: 96px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.fx-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.fx-search > svg { color: var(--muted); flex: none; }
+/* 搜索框里的输入框不能带自己的边框与底色：它是"填进这个框里"的，
+   整个 .fx-search 才是可见的那个框（资源管理器也是这个层次）。
+   选择器必须写成两级：app.css 给表单控件的那条是 input[type="search"]，
+   带属性选择器，权重(0-1-1)比单个类(0-1-0)高 —— 只写 .fx-search-input
+   会被它压住，结果是框里再套一个白底小框，比容器还高。 */
+.fx-search .fx-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+}
+.fx-search .fx-search-input:focus { border: 0; box-shadow: none; }
+.fx-search-input::placeholder { color: var(--muted); }
+
+/* ---------- 3. 命令栏 ---------- */
+
+.fx-cmdbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  height: 48px;
+  padding: 0 8px;
+  overflow-x: auto;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+/* 图标在上、文字在下。给足 64 宽是为了"重命名"这种三字标签不至于把按钮撑变形。 */
+.fx-cmd {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 64px;
+  height: 44px;
+  padding: 0;
+  flex: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.fx-cmd:not(:disabled):hover { background: var(--fx-hover); }
+.fx-cmd:disabled { opacity: .4; cursor: default; }
+.fx-cmd-foot { display: flex; align-items: center; gap: 3px; }
+.fx-cmd-label { font-size: 11.5px; line-height: 1; white-space: nowrap; }
+.fx-caret { color: var(--muted); font-size: 8px; line-height: 1; }
+.fx-div { flex: none; align-self: center; width: 1px; height: 24px; margin: 0 6px; background: var(--line-strong); }
+.fx-spacer { flex: 1 1 auto; min-width: 4px; }
+
+/* 最右侧那颗：显示"现在用的是哪种视图"，点开是切换菜单（和资源管理器一致）。 */
+.fx-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.fx-detail:hover, .fx-detail[aria-pressed="true"] { background: var(--fx-hover); }
+.fx-detail > svg { color: var(--muted); }
+
+/* ---------- 4. 左导航 + 主内容 ---------- */
+
+.fx-body { display: flex; flex: 1 1 auto; min-height: 0; min-width: 0; }
+
+.fx-pane {
+  flex: none;
+  width: 200px;
+  padding: 6px 0 12px;
+  overflow: auto;
+  border-right: 1px solid var(--line);
+}
+.fx-pane-title { padding: 10px 12px 4px; color: var(--muted); font-size: 11.5px; }
+.fx-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px 0 9px;
+  border: 0;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.fx-nav-item:hover { background: var(--fx-hover); }
+.fx-nav-item.fx-on { background: var(--fx-hover); border-left-color: var(--accent); }
+.fx-nav-item > svg { color: var(--muted); flex: none; }
+.fx-nav-item.fx-on > svg { color: var(--accent); }
+.fx-nav-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-nav-item .badge { flex: none; }
+
+.fx-content { position: relative; display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; min-height: 0; }
+/* 拖拽目标是整块内容区：画一圈内阴影比盖一层遮罩简单，也不会挡住行。 */
+.fx-content.fx-drop { box-shadow: inset 0 0 0 2px var(--accent); background: var(--accent-soft); }
+
+/* 列头。宽度必须与下面 .fx-modified / .fx-type / .fx-size 逐一对齐，
+   两边不一致就会出现"表头在左、数据在右"的错位。
+   它钉在滚动容器顶部，并且就放在容器里面 —— 这样出现纵向滚动条时，
+   表头和数据一起被同一条滚动条收窄，宽度仍然一致。 */
+.fx-cols {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: stretch;
+  flex: none;
+  height: 32px;
+  padding-right: 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.fx-col {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 8px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 11.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.fx-col:hover { background: var(--fx-hover); }
+.fx-col-name { flex: 1 1 auto; }
+.fx-col-modified { flex: 0 0 150px; }
+.fx-col-type { flex: 0 0 90px; }
+.fx-col-size { flex: 0 0 90px; }
+.fx-col-acts { flex: 0 0 136px; border-right: 0; cursor: default; }
+.fx-col-acts:hover { background: transparent; }
+.fx-sort { display: grid; place-items: center; }
+.fx-sort > svg { color: var(--ink); }
+.fx-sort.fx-desc > svg { transform: rotate(180deg); }
+
+.fx-rows { flex: 1 1 auto; min-height: 0; overflow: auto; }
+/* 行之间没有横线，只有悬停底色 —— 横线一多，一屏看起来像表格而不是列表。 */
+.fx-row { display: flex; align-items: center; height: 34px; padding-right: 8px; }
+.fx-row:hover { background: var(--fx-hover); }
+.fx-row.fx-sel { background: var(--accent-soft); }
+
+.fx-cell { min-width: 0; padding: 0 8px; color: var(--muted); font-size: 12.5px; }
+.fx-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  color: var(--ink);
+}
+.fx-lead { display: grid; place-items: center; width: 16px; flex: none; }
+.fx-row .fx-lead > svg { color: var(--muted); }
+.fx-row.fx-dir .fx-lead > svg { color: var(--accent); }
+.fx-name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-modified, .fx-type, .fx-size { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-modified { flex: 0 0 150px; }
+.fx-type { flex: 0 0 90px; }
+.fx-size { flex: 0 0 90px; }
+
+/* 行内操作。五颗 24px 的小按钮，平时透明，悬停整行才出现。 */
+.fx-acts {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  flex: 0 0 136px;
+  opacity: 0;
+}
+.fx-acts .icon-btn { width: 24px; height: 24px; }
+.fx-row:hover .fx-acts, .fx-row.fx-sel .fx-acts { opacity: 1; }
+/* 触屏没有 hover，靠悬停才出现的按钮等于不存在。 */
+@media (hover: none) {
+  .fx-acts { opacity: 1; }
+}
+
+.fx-thumb { display: none; }
+
+/* ---------- 网格模式 ---------- */
+
+.fx-content.fx-grid .fx-cols,
+.fx-content.fx-grid .fx-modified,
+.fx-content.fx-grid .fx-type,
+.fx-content.fx-grid .fx-size,
+.fx-content.fx-grid .fx-acts { display: none; }
+.fx-content.fx-grid .fx-rows {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+  align-content: start;
+  gap: 2px;
+  padding: 10px;
+}
+.fx-content.fx-grid .fx-row {
+  flex-direction: column;
+  height: auto;
+  padding: 8px 6px;
+  gap: 6px;
+  border-radius: var(--radius-sm);
+}
+.fx-content.fx-grid .fx-thumb { display: grid; place-items: center; width: 100%; height: 64px; }
+.fx-content.fx-grid .fx-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: var(--radius-sm); }
+.fx-content.fx-grid .fx-name { justify-content: center; padding: 0; text-align: center; }
+.fx-content.fx-grid .fx-name-text { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+/* 网格里图标由缩略图代替；多选时仍要露出勾选框。 */
+.fx-content.fx-grid .fx-lead { display: none; }
+.fx-content.fx-grid.fx-pick .fx-lead { display: grid; }
+
+/* ---------- 5. 批量操作条 ---------- */
+
+.fx-selbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 8px 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  font-size: 12.5px;
+}
+
+/* ---------- 上传进度 ---------- */
+
+.fx-uploads { display: flex; flex-direction: column; gap: 8px; flex: none; padding: 8px 10px; border-top: 1px solid var(--line); }
+.fx-uploads:empty { display: none; padding: 0; border-top: 0; }
+
+/* ---------- 6. 状态栏 ---------- */
+
+.fx-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  height: 28px;
+  padding: 0 10px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+}
+.fx-status-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-status-modes { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.fx-mode {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 24px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.fx-mode:hover { background: var(--fx-hover); }
+.fx-mode[aria-pressed="true"] { background: var(--fx-hover); color: var(--ink); }
+
+/* ---------- 菜单（命令栏下拉 + 右键菜单） ---------- */
+
+/* 挂到 body 上、用 fixed 定位：.win 是 overflow:hidden，放在按钮内部会被窗口
+ * 边缘裁掉。z-index 取 70 —— 在窗口（40）之上、浮层（80）之下，菜单不会盖住浮层。
+ * 菜单不在 .fx 里，拿不到那份派生色，这里按同样的算法再定义一次。 */
+.fx-menu {
+  --fx-hover: color-mix(in srgb, var(--ink) 7%, transparent);
+  position: fixed;
+  z-index: 70;
+  min-width: 176px;
+  max-width: 280px;
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
+}
+.fx-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.fx-menu-item:hover:not(:disabled) { background: var(--fx-hover); }
+.fx-menu-item:disabled { opacity: .4; cursor: default; }
+.fx-menu-tick { display: grid; place-items: center; width: 16px; flex: none; }
+.fx-menu-item > svg, .fx-menu-tick > svg { color: var(--muted); }
+.fx-menu-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-menu-sep { height: 1px; margin: 4px 6px; background: var(--line); }
+
+/* 右键菜单按资源管理器的手感：整块更大、字 13px、每项 30 高，
+   分组之间是一条真正"贯穿"的分隔线（缩进一点点）。 */
+.fx-ctx { min-width: 208px; padding: 6px; }
+.fx-ctx .fx-menu-item { height: 30px; gap: 10px; padding: 0 10px; font-size: 13px; }
+.fx-ctx .fx-menu-sep { margin: 5px 4px; }
+
+/* ---------- 窄屏 ---------- */
+
+/* 左导航窗格在这个宽度下能把内容区挤没，直接收起；
+   列也逐级砍掉，免得表头和数据各自横向滚动、对不上。 */
+@media (max-width: 860px) {
+  .fx-pane { display: none; }
+  .fx-cmd { width: 56px; }
+  .fx-search { flex-basis: 150px; }
+  .fx-tabs { padding-left: 6px; }
+}
+@media (max-width: 640px) {
+  .fx-modified, .fx-type, .fx-size,
+  .fx-col-modified, .fx-col-type, .fx-col-size { display: none; }
+  .fx-addr { gap: 6px; padding: 0 8px; }
+}
+
+/* 地址栏切成输入形态时，输入框要把整个灰底格子铺满，不能自己再长一个边框
+   （理由同上面那条 .fx-search-input：这是权重问题，不是有没有写样式的问题）。 */
+.fx-addr-field .fx-addr-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  outline: none;
+}
+.fx-addr-field .fx-addr-input:focus { border: 0; box-shadow: none; }
+/* 清除按钮紧贴输入框右端，放大镜在最右：与资源管理器的摆法一致 */
+.fx-search-clear,
+.fx-search-go {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.fx-search-clear:hover,
+.fx-search-go:hover { background: var(--surface-3); color: var(--ink); }
+.fx-search { display: flex; align-items: center; gap: 2px; }
+.fx-search-input { flex: 1; min-width: 0; }
+
+/* YCFMG 适配：文件视图占满内容区 */
+.view-fx { padding: 0 !important; display: flex; flex-direction: column; height: 100%; }
+.view-fx .fx { flex: 1 1 auto; min-height: 0; }
+
+/* ---------- YCFMG 追加：平铺 / 列表 两种模式的差异 ---------- */
+
+/* 平铺：网格里放横向卡片 */
+.fx-content.fx-tiles .fx-cols { display: none; }
+.fx-content.fx-tiles .fx-rows {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  align-content: start;
+  gap: 2px;
+  padding: 10px;
+}
+.fx-content.fx-tiles .fx-row { flex-wrap: wrap; height: auto; padding: 8px 10px; gap: 4px 10px; border-radius: var(--radius-sm); }
+.fx-content.fx-tiles .fx-lead { display: none; }
+.fx-content.fx-tiles .fx-thumb { display: grid; place-items: center; width: 48px; height: 48px; flex: none; }
+.fx-content.fx-tiles .fx-thumb img { max-width: 100%; max-height: 100%; object-fit: cover; border-radius: var(--radius-sm); }
+.fx-content.fx-tiles .fx-name { flex: 1 1 120px; }
+.fx-content.fx-tiles .fx-modified,
+.fx-content.fx-tiles .fx-type,
+.fx-content.fx-tiles .fx-size { flex: 0 0 auto; font-size: 11.5px; }
+.fx-content.fx-tiles .fx-acts { flex: 0 0 auto; }
+
+/* 列表：只留名称与大小 */
+.fx-content.fx-list .fx-cols { display: none; }
+.fx-content.fx-list .fx-modified,
+.fx-content.fx-list .fx-type { display: none; }
+
+/* 网格里的缩略图 */
+.fx-thumb img { display: block; }
+.fx-content.fx-grid .fx-row { cursor: default; }
+.fx-content.fx-grid .fx-cell { color: var(--muted); font-size: 11.5px; }
+
+/* 图标尺寸约束：SVG 默认 300x150，不约束会撑成一整块 */
+.fx-lead > svg { width: 16px; height: 16px; }
+.fx-acts .icon-btn > svg { width: 14px; height: 14px; }
+.fx-thumb > svg { width: 40px; height: 40px; }
+.fx-content.fx-tiles .fx-thumb > svg { width: 28px; height: 28px; }
+.nav-item .nic { width: 15px; height: 15px; }
+.nav-item svg, .icon-btn svg, .chip-btn svg { flex: none; }
+.fx-row { cursor: default; }

@@ -143,6 +143,11 @@ func (s *Server) routes() {
 
 func (s *Server) auth(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// 免登录模式：fpk 单机场景默认开启，按配置直接放行
+		if s.cfg.Auth.AllowGuest {
+			h(w, r)
+			return
+		}
 		if s.au.Current(r) == nil {
 			writeJSON(w, http.StatusUnauthorized, map[string]any{"ok": false, "error": "未登录或登录已过期"})
 			return

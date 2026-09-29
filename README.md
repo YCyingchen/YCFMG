@@ -3,7 +3,7 @@
   <h1>YCFMG</h1>
   <p><b>文件管理 × 智能图库 —— 一台设备上的 Windows 式文件中心与以图搜图图库</b></p>
   <p>
-    <code>fmg2609.004</code> ·
+    <code>fmg2609.005</code> ·
     <img src="https://img.shields.io/badge/Go-1.27-00ADD8" alt="Go"/>
     <img src="https://img.shields.io/badge/Docker-ycyingchen%2Fycfmg-2496ED" alt="Docker"/>
     <img src="https://img.shields.io/badge/fnOS-fpk-FF6A00" alt="fnOS"/>
@@ -81,7 +81,7 @@ compose 文件内容（可直接复制）：
 # 用法：docker compose up -d
 services:
   ycfmg:
-    image: ycyingchen/ycfmg:fmg2609.004   # 镜像，支持 amd64 / arm64
+    image: ycyingchen/ycfmg:fmg2609.005   # 镜像，支持 amd64 / arm64
     container_name: ycfmg                 # 容器名
     restart: unless-stopped               # 开机自启
     ports:
@@ -113,7 +113,7 @@ sudo ./dist/ycfmg-linux-amd64 --config /opt/ycfmg/etc/config.yaml
 
 ### 飞牛 NAS（fpk）
 ```bash
-bash scripts/build-fpk.sh                  # 产出 dist/YCFMG_fmg2609.004.fpk
+bash scripts/build-fpk.sh                  # 产出 dist/YCFMG_fmg2609.005.fpk
 ```
 然后在「应用中心 → 手动安装」中选择该文件。
 
@@ -148,7 +148,7 @@ YCFMG/
 
 ## 版本号规则
 
-`fmg<YY><MM>.<NNN>` —— 例如 `fmg2609.004`：
+`fmg<YY><MM>.<NNN>` —— 例如 `fmg2609.005`：
 - `26` 年份（2026 年）
 - `09` 月份（9 月）
 - `001` 当月第几次修改（每次发版递增）
@@ -159,7 +159,7 @@ YCFMG/
 
 | 项 | 结果 |
 | --- | --- |
-| 二进制启动 | `YCFMG fmg2609.004 (dev, linux/amd64, 2026-09-30)` |
+| 二进制启动 | `YCFMG fmg2609.005 (dev, linux/amd64, 2026-09-30)` |
 | 登录 / 会话 | 通过（401 保护生效） |
 | 目录浏览 | 通过（面包屑、目录图片计数正常） |
 | 增量索引 | 通过（5 张测试图入库，跳过未变化文件） |
@@ -183,13 +183,13 @@ YCFMG/
 
 MIT © 2026 ycyingchen
 
-## 交付状态（fmg2609.004）
+## 交付状态（fmg2609.005）
 
 | 交付物 | 位置 / 状态 |
 | --- | --- |
-| 源码仓库 | https://github.com/YCyingchen/YCFMG（main 分支，含 vfmg2609.004 标签） |
-| Docker 镜像 | docker pull ycyingchen/ycfmg:fmg2609.004（linux/amd64，149 MB） |
-| fpk 安装包 | dist/YCFMG_fmg2609.004.fpk（5.4 MB，含 manifest、图标与生命周期脚本） |
+| 源码仓库 | https://github.com/YCyingchen/YCFMG（main 分支，含 vfmg2609.005 标签） |
+| Docker 镜像 | docker pull ycyingchen/ycfmg:fmg2609.005（linux/amd64，149 MB） |
+| fpk 安装包 | dist/YCFMG_fmg2609.005.fpk（5.4 MB，含 manifest、图标与生命周期脚本） |
 | 静态二进制 | dist/ycfmg-linux-amd64 / arm64、darwin-amd64 / arm64、windows-amd64.exe |
 | 已部署实例 | 飞牛 NAS 127.0.0.1:8686（systemd 服务 ycfmg，开机自启） |
 | 验收截图 | docs/screenshots/ 共 9 张 |

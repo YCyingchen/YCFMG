@@ -7,6 +7,7 @@
 <title>YCFMG · 文件管理 + 智能图库</title>
 <link rel="icon" href="img/logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/explorer.css">
 </head>
 <body>
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
@@ -26,24 +27,24 @@
   <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1" fill="currentColor"/><rect x="13" y="4" width="7" height="7" rx="1" fill="currentColor"/><rect x="4" y="13" width="7" height="7" rx="1" fill="currentColor"/><rect x="13" y="13" width="7" height="7" rx="1" fill="currentColor"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="i-detail" viewBox="0 0 24 24"><path d="M4 6h6M4 12h6M4 18h6M14 6h6M14 12h6M14 18h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-tiles" viewBox="0 0 24 24"><rect x="3" y="5" width="8" height="6" rx="1" fill="currentColor"/><rect x="13" y="5" width="8" height="6" rx="1" fill="currentColor"/><rect x="3" y="13" width="8" height="6" rx="1" fill="currentColor"/><rect x="13" y="13" width="8" height="6" rx="1" fill="currentColor"/></symbol>
   <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 6 6.3.6-4.8 4.1 1.5 6.3L12 16.8 6.3 20l1.5-6.3L3 9.6 9.3 9z" fill="currentColor"/></symbol>
-  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 4.1a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 11a2 2 0 1 1 0 4 1.7 1.7 0 0 0-1.6 1z" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.6l1.4 2.2 2.6-.5.6 2.6 2.3 1.3-1.3 2.3 1.3 2.3-2.3 1.3-.6 2.6-2.6-.5L12 21.4l-1.4-2.2-2.6.5-.6-2.6-2.3-1.3L4.4 12 3.1 9.7l2.3-1.3.6-2.6 2.6.5z" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24"><path d="M8 5l0 14M4 9l4-4 4 4M16 19l0-14M12 15l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
 </svg>
 
-<div id="loginView" class="login-wrap">
+<!-- 登录已取消：直接进入主界面 -->
+<div id="loginView" class="login-wrap hidden">
   <form class="login-card" id="loginForm">
-    <div class="login-logo"><img src="img/logo.svg" alt="YCFMG"></div>
     <h1 id="loginBrand">YCFMG</h1>
-    <p id="loginSub">文件管理 · 智能图库</p>
-    <label>账号<input id="loginUser" value="admin" autocomplete="username"></label>
-    <label>密码<input id="loginPass" type="password" autocomplete="current-password" autofocus></label>
+    <label>账号<input id="loginUser" value="admin"></label>
+    <label>密码<input id="loginPass" type="password"></label>
     <div class="login-err" id="loginErr"></div>
     <button class="btn primary lg" type="submit">登录</button>
   </form>
 </div>
-
 <div id="app" class="app hidden">
   <header class="titlebar">
     <div class="tb-left">
@@ -59,62 +60,17 @@
     <div class="tb-center">
       <div class="searchbox">
         <svg class="ic"><use href="#i-search"/></svg>
-        <input id="globalSearch" placeholder="搜索文件、图片、标签、相机，或拖入一张图以图搜图">
+        <input id="globalSearch" placeholder="搜索文件、图片、标签，或拖入一张图以图搜图">
         <span class="search-kind" id="searchKind">以文搜图</span>
       </div>
     </div>
     <div class="tb-right">
       <button class="icon-btn" id="btnTheme" title="切换主题"><svg><use href="#i-eye"/></svg></button>
+      <button class="icon-btn" id="btnIndex" title="立即索引当前目录"><svg><use href="#i-refresh"/></svg></button>
       <button class="icon-btn" id="btnSettings" title="设置"><svg><use href="#i-settings"/></svg></button>
-      <div class="user-chip" id="userChip">admin</div>
-    </div>
-  </header>
-
-  <div class="toolbar">
-    <div class="tb-group">
-      <button class="icon-btn" id="tbBack" title="后退"><svg><use href="#i-back"/></svg></button>
-      <button class="icon-btn" id="tbFwd" title="前进"><svg><use href="#i-fwd"/></svg></button>
-      <button class="icon-btn" id="tbUp" title="上一级"><svg><use href="#i-up"/></svg></button>
-      <button class="icon-btn" id="tbRefresh" title="刷新"><svg><use href="#i-refresh"/></svg></button>
-    </div>
-    <div class="tb-sep"></div>
-    <div class="tb-group">
-      <button class="icon-btn" id="tbNew" title="新建文件夹"><svg><use href="#i-plus"/></svg></button>
-      <button class="icon-btn" id="tbUpload" title="上传"><svg><use href="#i-upload"/></svg></button>
-      <button class="icon-btn" id="tbDownload" title="下载"><svg><use href="#i-download"/></svg></button>
-      <button class="icon-btn" id="tbShare" title="分享"><svg><use href="#i-share"/></svg></button>
-      <button class="icon-btn" id="tbDelete" title="删除"><svg><use href="#i-trash"/></svg></button>
-    </div>
-    <div class="tb-sep"></div>
-    <div class="tb-group" id="viewSwitch">
-      <button class="icon-btn" data-view="icons" title="大图标"><svg><use href="#i-grid"/></svg></button>
-      <button class="icon-btn" data-view="list" title="列表"><svg><use href="#i-list"/></svg></button>
-      <button class="icon-btn" data-view="details" title="详细信息"><svg><use href="#i-detail"/></svg></button>
-    </div>
-    <div class="tb-sep"></div>
-    <div class="tb-group">
-      <select id="sortSelect" class="mini-select">
-        <option value="name">名称</option>
-        <option value="taken">拍摄时间</option>
-        <option value="mtime">修改时间</option>
-        <option value="size">大小</option>
-        <option value="type">类型</option>
-        <option value="rating">评分</option>
-      </select>
-      <button class="icon-btn" id="sortDir" title="排序方向">↓</button>
-    </div>
-    <div class="tb-fill"></div>
-    <div class="tb-group">
-      <button class="chip-btn" id="btnIndex">立即索引</button>
       <span class="index-state" id="indexState"></span>
     </div>
-  </div>
-
-  <div class="addressbar">
-    <button class="crumbs-toggle" id="crumbsToggle" title="展开路径">›</button>
-    <div class="crumbs" id="crumbs"></div>
-    <input class="addr-input hidden" id="addrInput" spellcheck="false">
-  </div>
+  </header>
 
   <div class="body">
     <aside class="nav" id="nav">
@@ -141,8 +97,80 @@
     </aside>
 
     <main class="content" id="content">
-      <div id="viewExplorer" class="view"></div>
-      <div id="viewGallery" class="view hidden"></div>
+      <div id="viewExplorer" class="view view-fx">
+        <div class="fx">
+          <div class="fx-addr">
+            <button class="fx-icon-btn" id="tbBack" title="后退"><svg width="16" height="16"><use href="#i-back"/></svg></button>
+            <button class="fx-icon-btn fx-flip" id="tbFwd" title="前进"><svg width="16" height="16"><use href="#i-back"/></svg></button>
+            <button class="fx-icon-btn" id="tbUp" title="上一级"><svg width="16" height="16"><use href="#i-up"/></svg></button>
+            <button class="fx-icon-btn" id="tbRefresh" title="刷新"><svg width="16" height="16"><use href="#i-refresh"/></svg></button>
+            <div class="fx-addr-field">
+              <svg width="14" height="14"><use href="#i-folder"/></svg>
+              <div class="fx-crumbs" id="crumbs"></div>
+            </div>
+            <div class="fx-search">
+              <svg width="14" height="14"><use href="#i-search"/></svg>
+              <input id="addrInput" class="fx-search-input" spellcheck="false" placeholder="输入路径后回车">
+            </div>
+          </div>
+
+          <div class="fx-cmdbar">
+            <button class="fx-cmd" id="tbNew" title="新建文件夹"><svg width="16" height="16"><use href="#i-plus"/></svg><span class="fx-cmd-foot"><span class="fx-cmd-label">新建</span></span></button>
+            <button class="fx-cmd" id="tbUpload" title="上传文件"><svg width="16" height="16"><use href="#i-upload"/></svg><span class="fx-cmd-foot"><span class="fx-cmd-label">上传</span></span></button>
+            <button class="fx-cmd" id="tbDownload" title="下载所选"><svg width="16" height="16"><use href="#i-download"/></svg><span class="fx-cmd-foot"><span class="fx-cmd-label">下载</span></span></button>
+            <button class="fx-cmd" id="tbShare" title="分享所选"><svg width="16" height="16"><use href="#i-share"/></svg><span class="fx-cmd-foot"><span class="fx-cmd-label">分享</span></span></button>
+            <button class="fx-cmd" id="tbDelete" title="删除所选"><svg width="16" height="16"><use href="#i-trash"/></svg><span class="fx-cmd-foot"><span class="fx-cmd-label">删除</span></span></button>
+            <span class="fx-div"></span>
+            <button class="fx-cmd" id="tbIndex" title="为当前目录建立索引"><svg width="16" height="16"><use href="#i-refresh"/></svg><span class="fx-cmd-foot"><span class="fx-cmd-label">索引</span></span></button>
+            <span class="fx-spacer"></span>
+            <span class="tb-group" id="viewSwitch">
+              <button class="fx-icon-btn" data-view="icons" title="大图标"><svg width="15" height="15"><use href="#i-grid"/></svg></button>
+              <button class="fx-icon-btn" data-view="tiles" title="平铺"><svg width="15" height="15"><use href="#i-tiles"/></svg></button>
+              <button class="fx-icon-btn" data-view="list" title="列表"><svg width="15" height="15"><use href="#i-list"/></svg></button>
+              <button class="fx-icon-btn" data-view="details" title="详细信息"><svg width="15" height="15"><use href="#i-detail"/></svg></button>
+            </span>
+            <select id="sortSelect" class="mini-select" style="margin-left:8px">
+              <option value="name">名称</option>
+              <option value="taken">拍摄时间</option>
+              <option value="mtime">修改时间</option>
+              <option value="size">大小</option>
+              <option value="type">类型</option>
+              <option value="rating">评分</option>
+            </select>
+            <button class="fx-icon-btn" id="sortDir" title="排序方向"><svg width="15" height="15"><use href="#i-sort"/></svg></button>
+          </div>
+
+          <div class="fx-content" id="fxContent">
+            <div class="fx-cols" id="fxCols"></div>
+            <div class="fx-rows" id="fxRows"></div>
+          </div>
+
+          <div class="fx-status">
+            <span id="statusLeft">就绪</span>
+            <span class="fx-spacer"></span>
+            <span id="statusRight"></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="viewGallery" class="view view-fx hidden">
+        <div class="fx">
+          <div class="fx-cmdbar">
+            <span class="fx-cmd-label" style="padding:0 6px;color:var(--muted)">分类</span>
+            <select id="filterClassify" class="mini-select"><option value="">全部分类</option></select>
+            <span class="fx-cmd-label" style="padding:0 6px 0 10px;color:var(--muted)">色调</span>
+            <select id="filterColor" class="mini-select"><option value="">全部色调</option></select>
+            <button class="chip-btn" id="filterFav" style="margin-left:10px">收藏</button>
+            <button class="chip-btn" id="filterClear" style="margin-left:6px">清除</button>
+            <span class="fx-div"></span>
+            <button class="chip-btn" id="galDuplicate">查找重复图</button>
+            <button class="chip-btn" id="galIndex" style="margin-left:6px">索引当前目录</button>
+            <span class="fx-spacer"></span>
+            <span id="galCount" class="index-state"></span>
+          </div>
+          <div class="fx-rows" id="galRows" style="padding:12px"></div>
+        </div>
+      </div>
       <div id="viewSearch" class="view hidden"></div>
       <div id="viewShares" class="view hidden"></div>
       <div id="viewSettings" class="view hidden"></div>
@@ -157,12 +185,6 @@
       </div>
     </aside>
   </div>
-
-  <footer class="statusbar">
-    <span id="statusLeft">就绪</span>
-    <span class="fill"></span>
-    <span id="statusRight"></span>
-  </footer>
 </div>
 
 <div id="ctxMenu" class="ctxmenu hidden"></div>

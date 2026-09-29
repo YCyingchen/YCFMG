@@ -1,26 +1,18 @@
-/* YCFMG 文件管理器视图：Windows 资源管理器式的浏览、选择、拖拽与右键操作 */
+/* YCFMG 文件管理视图：按 YCNAS 的资源管理器样式渲染（fx- 结构） */
 (function () {
   "use strict";
-
   var E = UI.el, I = UI.icon;
 
   var state = {
-    path: "",
-    parent: "",
-    entries: [],
-    sel: [],
-    anchor: -1,
-    view: "icons",
-    sort: "name",
-    desc: false,
-    loading: false,
-    writable: false,
-    hidden: false
+    path: "", parent: "", entries: [], sel: [], anchor: -1,
+    view: "details", sort: "name", desc: false,
+    loading: false, writable: false, hidden: false
   };
-
   var clipboard = { mode: "", paths: [] };
 
-  function container() { return document.getElementById("viewExplorer"); }
+  function rowsEl() { return document.getElementById("fxRows"); }
+  function colsEl() { return document.getElementById("fxCols"); }
+  function contentEl() { return document.getElementById("fxContent"); }
 
   function onSelChange() {
     if (window.App) { window.App.onSelectionChanged(state.sel); }
@@ -61,74 +53,122 @@
     return list;
   }
 
-  function isSelected(path) {
-    return state.sel.some(function (e) { return e.path === path; });
+  function isSelected(p) { return state.sel.some(function (e) { return e.path === p; }); }
+  function leadIcon(it) { return I(it.is_dir ? "i-folder" : (it.kind === "image" ? "i-image" : "i-file")); }
+
+  function renderCols() {
+    var c = colsEl();
+    c.innerHTML = "";
+    if (state.view !== "details") { c.style.display = "none"; return; }
+    c.style.display = "flex";
+    var defs = [
+      ["name", "名称", "fx-col fx-col-name"],
+      ["mtime", "修改日期", "fx-col fx-col-modified"],
+      ["type", "类型", "fx-col fx-col-type"],
+      ["size", "大小", "fx-col fx-col-size"]
+    ];
+    defs.forEach(function (d) {
+      var b = E("button", d[2]);
+      b.appendChild(E("span", null, d[1]));
+      if (state.sort === d[0]) {
+        var s = E("span", "fx-sort" + (state.desc ? " fx-desc" : ""));
+        s.appendChild(I("i-up"));
+        b.appendChild(s);
+      }
+      b.onclick = function () {
+        if (state.sort === d[0]) { state.desc = !state.desc; } else { state.sort = d[0]; state.desc = false; }
+        var sel = document.getElementById("sortSelect");
+        if (sel) { sel.value = state.sort; }
+        render();
+      };
+      c.appendChild(b);
+    });
+    c.appendChild(E("div", "fx-col fx-col-acts"));
+  }
+
+  function row(it) {
+    var cls = "fx-row" + (it.is_dir ? " fx-dir" : "") + (isSelected(it.path) ? " fx-sel" : "");
+    var r = E("div", cls);
+    var lead = E("span", "fx-cell fx-lead");
+    lead.appendChild(leadIcon(it));
+    r.appendChild(lead);
+    if (state.view === "icons" || state.view === "tiles") {
+      var th = E("div", "fx-thumb");
+      if (it.kind === "image" && it.size >= 0) {
+        var img = document.createElement("img");
+        img.loading = "lazy";
+        img.src = API.thumbURL(it.path, state.view === "icons" ? 256 : 128);
+        img.alt = it.name;
+        th.appendChild(img);
+      } else {
+        var big = leadIcon(it);
+        big.setAttribute("width", "40");
+        big.setAttribute("height", "40");
+        th.appendChild(big);
+      }
+      r.appendChild(th);
+    }
+    var nm = E("span", "fx-cell fx-name");
+    nm.appendChild(E("span", "fx-name-text", it.name));
+    if (it.favorite) {
+      var st = I("i-star");
+      st.setAttribute("width", "12");
+      st.setAttribute("height", "12");
+      nm.appendChild(st);
+    }
+    r.appendChild(nm);
+    r.appendChild(E("span", "fx-cell fx-modified", UI.fmtTime(it.mtime, false)));
+    r.appendChild(E("span", "fx-cell fx-type", it.is_dir ? "文件夹" : (it.ext || "文件")));
+    r.appendChild(E("span", "fx-cell fx-size", it.is_dir ? "" : UI.fmtSize(it.size)));
+    var acts = E("span", "fx-cell fx-acts");
+    function actBtn(icon, title, fn) {
+      var b = E("button", "icon-btn");
+      b.title = title;
+      b.appendChild(I(icon));
+      b.onclick = function (ev) { ev.stopPropagation(); fn(); };
+      return b;
+    }
+    acts.appendChild(actBtn("i-eye", "查看", function () { open(it); }));
+    acts.appendChild(actBtn("i-download", "下载", function () { window.location.href = API.fileURL(it.path, true); }));
+    acts.appendChild(actBtn("i-share", "分享", function () { if (window.App.sharePaths) { window.App.sharePaths([it.path]); } }));
+    if (state.writable) {
+      acts.appendChild(actBtn("i-plus", "重命名", function () { if (window.App.renameEntry) { window.App.renameEntry(it); } }));
+      acts.appendChild(actBtn("i-trash", "删除", function () { if (window.App.deletePaths) { window.App.deletePaths([it.path]); } }));
+    }
+    r.appendChild(acts);
+    bindItem(r, it);
+    return r;
   }
 
   function render() {
-    var c = container();
-    c.innerHTML = "";
-    if (state.loading) {
-      var load = E("div", "empty-big");
-      load.appendChild(E("div", null, "正在读取目录 ..."));
-      c.appendChild(load);
-      return;
-    }
+    var c = contentEl();
+    c.className = "fx-content" +
+      (state.view === "icons" ? " fx-grid" : "") +
+      (state.view === "tiles" ? " fx-tiles" : "") +
+      (state.view === "list" ? " fx-list" : "");
+    renderCols();
+    var rows = rowsEl();
+    rows.innerHTML = "";
+    if (state.loading) { rows.appendChild(E("div", "empty-big", "正在读取目录 ...")); return; }
     var list = sorted();
     if (!list.length) {
       var empty = E("div", "empty-big");
       empty.appendChild(I("i-folder"));
       empty.appendChild(E("div", null, "此文件夹为空"));
-      empty.appendChild(E("div", "muted", "可拖入文件上传，或右键新建文件夹"));
-      c.appendChild(empty);
+      rows.appendChild(empty);
       return;
     }
-    var wrap;
-    if (state.view === "icons") { wrap = E("div", "files-grid"); }
-    else if (state.view === "list") { wrap = E("div", "files-list"); }
-    else { wrap = E("div", "files-list"); }
-    if (state.view === "details") {
-      wrap.appendChild(headRow());
-    }
-    list.forEach(function (it, idx) {
-      var row;
-      if (state.view === "icons") { row = tileIcon(it); }
-      else if (state.view === "list") { row = rowLine(it, idx); }
-      else { row = rowDetail(it, idx); }
-      wrap.appendChild(row);
-    });
-    c.appendChild(wrap);
-    c.onmousedown = function (ev) {
-      if (ev.target === c || ev.target === wrap) { clearSel(); }
-    };
+    list.forEach(function (it) { rows.appendChild(row(it)); });
     syncStatus();
-  }
-
-  function headRow() {
-    var cols = [["", ""], ["name", "名称"], ["mtime", "修改日期"], ["type", "类型"], ["size", "大小"]];
-    var r = E("div", "row head-row");
-    cols.forEach(function (c) {
-      var cell = E("div", null, c[1]);
-      if (c[0]) {
-        cell.style.cursor = "pointer";
-        cell.onclick = function () {
-          if (state.sort === c[0]) { state.desc = !state.desc; } else { state.sort = c[0]; state.desc = false; }
-          render();
-        };
-        if (state.sort === c[0]) { cell.textContent = c[1] + (state.desc ? " ↓" : " ↑"); }
-      }
-      r.appendChild(cell);
-    });
-    return r;
+    rows.oncontextmenu = function (ev) {
+      if (ev.target === rows) { ev.preventDefault(); blankMenu(ev.clientX, ev.clientY); }
+    };
+    rows.onmousedown = function (ev) { if (ev.target === rows) { clearSel(); } };
   }
 
   function bindItem(node, it) {
     node.dataset.path = it.path;
-    if (isSelected(it.path)) { node.classList.add("sel"); }
-    node.onclick = function (ev) {
-      ev.stopPropagation();
-      select(it, ev.ctrlKey || ev.metaKey, ev.shiftKey);
-    };
+    node.onclick = function (ev) { ev.stopPropagation(); select(it, ev.ctrlKey || ev.metaKey, ev.shiftKey); };
     node.ondblclick = function (ev) { ev.stopPropagation(); open(it); };
     node.oncontextmenu = function (ev) {
       ev.preventDefault();
@@ -139,66 +179,20 @@
     node.draggable = true;
     node.ondragstart = function (ev) {
       if (!isSelected(it.path)) { state.sel = [it]; render(); onSelChange(); }
-      ev.dataTransfer.setData("text/plain", state.sel.map(function (s) { return s.path; }).join("\n"));
+      ev.dataTransfer.setData("text/plain", state.sel.map(function (s) { return s.path; }).join(String.fromCharCode(10)));
       ev.dataTransfer.effectAllowed = "copyMove";
     };
     if (it.is_dir) {
-      node.ondragover = function (ev) { ev.preventDefault(); node.classList.add("sel"); };
-      node.ondragleave = function () { if (!isSelected(it.path)) { node.classList.remove("sel"); } };
+      node.ondragover = function (ev) { ev.preventDefault(); node.classList.add("fx-sel"); };
+      node.ondragleave = function () { if (!isSelected(it.path)) { node.classList.remove("fx-sel"); } };
       node.ondrop = function (ev) {
         ev.preventDefault();
         ev.stopPropagation();
-        node.classList.remove("sel");
-        var paths = (ev.dataTransfer.getData("text/plain") || "").split("\n").filter(Boolean);
+        node.classList.remove("fx-sel");
+        var paths = (ev.dataTransfer.getData("text/plain") || "").split(String.fromCharCode(10)).filter(Boolean);
         if (paths.length) { window.App.movePaths(paths, it.path); }
       };
     }
-  }
-
-  function tileIcon(it) {
-    var t = E("div", "tile");
-    var th = E("div", "thumb");
-    if (it.kind === "image" && it.size >= 0) {
-      var img = document.createElement("img");
-      img.loading = "lazy";
-      img.src = API.thumbURL(it.path, 256);
-      img.alt = it.name;
-      th.appendChild(img);
-    } else if (it.is_dir) {
-      th.appendChild(I("i-folder"));
-    } else if (it.kind === "video") {
-      th.appendChild(I("i-image"));
-    } else {
-      th.appendChild(I("i-file"));
-    }
-    t.appendChild(th);
-    t.appendChild(E("div", "nm", it.name));
-    bindItem(t, it);
-    return t;
-  }
-
-  function rowLine(it, idx) {
-    var r = E("div", "row");
-    var ic = I(it.is_dir ? "i-folder" : (it.kind === "image" ? "i-image" : "i-file"), "ico");
-    r.appendChild(ic);
-    r.appendChild(E("div", "nm", it.name));
-    r.appendChild(E("div", "muted", UI.fmtSize(it.size)));
-    r.appendChild(E("div", "muted", UI.fmtTime(it.mtime)));
-    r.appendChild(E("div", "muted", UI.kindLabel(it.kind)));
-    bindItem(r, it);
-    return r;
-  }
-
-  function rowDetail(it, idx) {
-    var r = E("div", "row");
-    var ic = I(it.is_dir ? "i-folder" : (it.kind === "image" ? "i-image" : "i-file"), "ico");
-    r.appendChild(ic);
-    r.appendChild(E("div", "nm", it.name));
-    r.appendChild(E("div", "muted", UI.fmtTime(it.mtime)));
-    r.appendChild(E("div", "muted", it.is_dir ? "文件夹" : (it.ext || "文件")));
-    r.appendChild(E("div", "muted", it.is_dir ? "" : UI.fmtSize(it.size)));
-    bindItem(r, it);
-    return r;
   }
 
   function select(it, additive, range) {
@@ -206,15 +200,10 @@
       var list = sorted();
       var a = state.anchor, b = list.indexOf(it);
       if (b < 0) { b = list.length - 1; }
-      var lo = Math.min(a, b), hi = Math.max(a, b);
-      state.sel = list.slice(lo, hi + 1);
+      state.sel = list.slice(Math.min(a, b), Math.max(a, b) + 1);
     } else if (additive) {
-      if (isSelected(it.path)) {
-        state.sel = state.sel.filter(function (s) { return s.path !== it.path; });
-      } else {
-        state.sel = state.sel.concat([it]);
-        state.anchor = sorted().indexOf(it);
-      }
+      if (isSelected(it.path)) { state.sel = state.sel.filter(function (s) { return s.path !== it.path; }); }
+      else { state.sel = state.sel.concat([it]); state.anchor = sorted().indexOf(it); }
     } else {
       state.sel = [it];
       state.anchor = sorted().indexOf(it);
@@ -223,46 +212,36 @@
     onSelChange();
   }
 
-  function clearSel() {
-    if (!state.sel.length) { return; }
-    state.sel = [];
-    render();
-    onSelChange();
-  }
-
-  function selectAll() {
-    state.sel = sorted().slice();
-    render();
-    onSelChange();
-  }
+  function clearSel() { if (!state.sel.length) { return; } state.sel = []; render(); onSelChange(); }
+  function selectAll() { state.sel = sorted().slice(); render(); onSelChange(); }
 
   function open(it) {
     if (it.is_dir) { window.App.navigateFiles(it.path); return; }
-    if (it.kind === "image") { window.App.openLightbox(it.path, state.entries.filter(function (e) { return e.kind === "image"; })); return; }
+    if (it.kind === "image") {
+      window.App.openLightbox(it.path, state.entries.filter(function (e) { return e.kind === "image"; }));
+      return;
+    }
     window.location.href = API.fileURL(it.path, true);
   }
 
   function itemMenu(x, y, it) {
-    var many = state.sel.length > 1;
     var items = [
       { label: "打开", icon: "i-folder", action: function () { open(it); } },
-      { label: "在新标签页打开", icon: "i-eye", action: function () { window.open(API.fileURL(it.path, false), "_blank"); } },
-      { sep: true },
       { label: "下载", icon: "i-download", action: function () { window.location.href = API.fileURL(it.path, true); } },
-      { label: "分享", icon: "i-share", action: function () { window.App.sharePaths(state.sel.map(function (s) { return s.path; })); } },
+      { label: "分享", icon: "i-share", action: function () { if (window.App.sharePaths) { window.App.sharePaths(state.sel.map(function (s) { return s.path; })); } } },
       { label: "以图搜图", icon: "i-search", disabled: it.kind !== "image", action: function () { window.App.similarByPath(it.path); } }
     ];
     if (state.writable) {
       items = items.concat([
         { sep: true },
-        { label: "重命名", action: function () { window.App.renameEntry(it); } },
+        { label: "重命名", action: function () { if (window.App.renameEntry) { window.App.renameEntry(it); } } },
         { label: "复制", action: function () { clipboard = { mode: "copy", paths: state.sel.map(function (s) { return s.path; }) }; UI.toast("已复制 " + state.sel.length + " 项"); } },
         { label: "剪切", action: function () { clipboard = { mode: "cut", paths: state.sel.map(function (s) { return s.path; }) }; UI.toast("已剪切 " + state.sel.length + " 项"); } },
-        { label: "删除", icon: "i-trash", danger: true, action: function () { window.App.deleteEntries(state.sel); } }
+        { label: "删除", icon: "i-trash", danger: true, action: function () { if (window.App.deleteEntries) { window.App.deleteEntries(state.sel); } } }
       ]);
     }
     items.push({ sep: true });
-    items.push({ label: "详细信息", action: function () { window.App.showDetails(it); } });
+    items.push({ label: "详细信息", action: function () { if (window.App.showDetails) { window.App.showDetails(it); } } });
     UI.menu(x, y, items);
   }
 
@@ -278,7 +257,7 @@
     }
     items.push({ label: "全选", action: selectAll });
     items.push({ label: "刷新", icon: "i-refresh", action: function () { load(state.path); } });
-    items.push({ label: "在此处为图片建立索引", action: function () { window.App.indexNow(state.path); } });
+    items.push({ label: "为当前目录建立索引", action: function () { window.App.indexNow(state.path); } });
     UI.menu(x, y, items);
   }
 
@@ -295,15 +274,9 @@
       state.sel = [];
       state.anchor = -1;
       state.loading = false;
-      if (!opts.keepView) { window.App.setCrumbs(d.crumbs || [], d.path); }
+      if (!opts.keepView && window.App.setCrumbs) { window.App.setCrumbs(d.crumbs || [], d.path); }
       render();
       onSelChange();
-      container().oncontextmenu = function (ev) {
-        if (ev.target === container() || ev.target.classList.contains("files-grid") || ev.target.classList.contains("files-list") || ev.target.classList.contains("empty-big")) {
-          ev.preventDefault();
-          blankMenu(ev.clientX, ev.clientY);
-        }
-      };
       return d;
     } catch (e) {
       state.loading = false;
@@ -329,19 +302,9 @@
     render();
   }
 
-  function setPath(p) { state.path = p; }
-
   window.Explorer = {
-    state: state,
-    load: load,
-    refresh: refresh,
-    render: render,
-    setView: setView,
-    setSort: setSort,
-    setPath: setPath,
-    selectAll: selectAll,
-    clearSel: clearSel,
-    open: open,
+    state: state, load: load, refresh: refresh, render: render,
+    setView: setView, setSort: setSort, selectAll: selectAll, clearSel: clearSel, open: open,
     getSelection: function () { return state.sel; },
     setClipboard: function (mode, paths) { clipboard = { mode: mode, paths: paths }; },
     getClipboard: function () { return clipboard; },

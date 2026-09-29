@@ -22,7 +22,8 @@ mkdir -p "$DIST" "$TMPDIR"
 
 LDFLAGS="-s -w -X github.com/ycyingchen/ycfmg/internal/version.Version=$VERSION -X github.com/ycyingchen/ycfmg/internal/version.Commit=$COMMIT -X github.com/ycyingchen/ycfmg/internal/version.BuildTime=$BUILDTIME"
 
-TARGETS="${TARGETS:-linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64}"
+# 仅保留 fpk 所需的 linux/amd64（其他分发形式已下线）
+TARGETS="${TARGETS:-linux/amd64}"
 
 echo "== YCFMG 构建 $VERSION ($COMMIT) =="
 for t in $TARGETS; do

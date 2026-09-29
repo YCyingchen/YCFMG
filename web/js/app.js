@@ -25,18 +25,17 @@
   async function boot() {
     try { App.pub = await API.public(); } catch (e) { App.pub = { brand: "YCFMG", subtitle: "文件管理 · 智能图库" }; }
     API.setBase((App.pub && App.pub.base_path) || "");
-    $("loginBrand").textContent = (App.pub && App.pub.brand) || "YCFMG";
-    $("loginSub").textContent = (App.pub && App.pub.subtitle) || "";
-    applyTheme(localStorage.getItem("ycfmg-theme") || "");
-    $("loginForm").onsubmit = doLogin;
+    var _lb=$("loginBrand"); if(_lb) _lb.textContent = (App.pub && App.pub.brand) || "YCFMG";
+        applyTheme(localStorage.getItem("ycfmg-theme") || "");
+    var _lf=$("loginForm"); if(_lf) _lf.onsubmit = doLogin;
+    // 免登录模式：直接进入主界面
     try {
       var me = await API.me();
-      App.user = me.username;
-      enterApp();
+      App.user = me.username || '访客';
     } catch (e) {
-      $("loginView").classList.remove("hidden");
-      $("app").classList.add("hidden");
+      App.user = '访客';
     }
+    enterApp();
   }
 
   async function doLogin(ev) {
@@ -61,7 +60,7 @@
   function enterApp() {
     $("loginView").classList.add("hidden");
     $("app").classList.remove("hidden");
-    $("userChip").textContent = App.user || "admin";
+    var uc = $("userChip"); if (uc) { uc.textContent = App.user || "访客"; }
     bindUI();
     refreshNav();
     if (App.startPolling) { App.startPolling(); }
@@ -195,16 +194,16 @@
     var input = $("addrInput");
     box.innerHTML = "";
     if (input) { input.value = path || ""; }
-    if (!crumbs.length) { box.appendChild(E("span", "c", "此设备")); return; }
-    var first = E("span", "c", "此设备");
+    if (!crumbs.length) { box.appendChild(E("span", "fx-crumb", "此设备")); return; }
+    var first = E("span", "fx-crumb", "此设备");
     first.onclick = function () {
       var libs = (App.pub && App.pub.libraries) || [];
       navigateFiles(libs.length ? libs[0].path : "");
     };
     box.appendChild(first);
     crumbs.forEach(function (c, idx) {
-      box.appendChild(E("span", "sep", "›"));
-      var n = E("span", "c", c.name);
+      box.appendChild(E("span", "fx-crumb-sep", "›"));
+      var n = E("span", "fx-crumb", c.name);
       n.title = c.path;
       n.onclick = function () { navigateFiles(c.path); };
       if (idx === crumbs.length - 1) { n.style.fontWeight = "600"; }
@@ -241,13 +240,18 @@
       if (App.sharePaths) { App.sharePaths(sel.map(function (s) { return s.path; })); }
     };
     $("tbDelete").onclick = function () { deleteEntries(Explorer.getSelection()); };
-    $("btnIndex").onclick = function () { indexNow(Explorer.state.path || ""); };
+    function bindIndex() {
+    var p = Explorer.state.path || "";
+    indexNow(p);
+  }
+  $("btnIndex").onclick = bindIndex;
+  if ($("tbIndex")) { $("tbIndex").onclick = bindIndex; }
     $("btnTheme").onclick = function () {
       var cur = document.documentElement.getAttribute("data-theme") || "light";
       applyTheme(cur === "dark" ? "light" : "dark");
     };
     $("btnSettings").onclick = function () { location.hash = "#/settings"; };
-    $("userChip").onclick = function (ev) {
+    var ucb = $("userChip"); if (ucb) ucb.onclick = function (ev) {
       UI.menu(ev.clientX, ev.clientY, [
         { label: "个人设置", action: function () { location.hash = "#/settings"; } },
         { label: "修改密码", action: function () { if (App.changePassword) { App.changePassword(); } } },
@@ -265,7 +269,7 @@
       if (App.route === "gallery") { Gallery.state.desc = !Gallery.state.desc; Gallery.reload(); }
       else { Explorer.setSort(Explorer.state.sort, !Explorer.state.desc); }
     };
-    $("crumbsToggle").onclick = function () {
+    var ct = $("crumbsToggle"); if (ct) ct.onclick = function () {
       var inp = $("addrInput");
       inp.classList.toggle("hidden");
       if (!inp.classList.contains("hidden")) { inp.focus(); inp.select(); }

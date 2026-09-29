@@ -4,49 +4,45 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>YCFMG · 文件管理 + 智能图库 · 下载</title>
+<title>YCFMG · 飞牛 NAS 文件管理 + 智能图库</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--fg:#111827;--muted:#6b7280;--line:#e5e7eb;--brand:#2563eb;--brand2:#0ea5e9;--ok:#059669;--shadow:0 10px 30px rgba(16,24,40,.08)}
-@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--card:#161b22;--fg:#e6edf3;--muted:#9aa5b1;--line:#26303b;--shadow:0 10px 30px rgba(0,0,0,.5)}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
-a{color:var(--brand);text-decoration:none}a:hover{text-decoration:underline}
-.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
-header{background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;padding:52px 0 60px}
+:root{--bg:#f3f3f3;--card:#fff;--ink:#1b1b1b;--muted:#5c5c5c;--line:#e5e5e5;--accent:#0067c0;--radius:8px;--shadow:0 12px 32px rgba(0,0,0,.14)}
+@media (prefers-color-scheme:dark){:root{--bg:#1f1f1f;--card:#272727;--ink:#eee;--muted:#a6a6a6;--line:#3a3a3a;--shadow:0 12px 32px rgba(0,0,0,.5)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+header{background:linear-gradient(135deg,#0067c0,#0ea5e9);color:#fff;padding:48px 0 54px}
 .brand{display:flex;align-items:center;gap:16px}
-.brand img{width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,.14);padding:6px}
-.brand h1{margin:0;font-size:30px;letter-spacing:.4px}
-.brand p{margin:2px 0 0;opacity:.92;font-size:14px}
-.tagline{margin:22px 0 0;font-size:17px;opacity:.96;max-width:720px}
-.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
-.badge{padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.18);font-size:12.5px}
-main{padding:38px 0 60px}
-h2{font-size:19px;margin:34px 0 14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow)}
-.card h3{margin:0 0 8px;font-size:16px;display:flex;align-items:center;gap:8px}
-.card p{margin:0;color:var(--muted);font-size:13.5px}
-.primary{grid-column:1/-1;border:2px solid var(--brand)}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-weight:600;border:0;cursor:pointer;text-decoration:none;font-size:14.5px}
-.btn:hover{filter:brightness(1.06);text-decoration:none}
-.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line);font-weight:500}
-.btn.ghost:hover{border-color:var(--brand);color:var(--brand)}
-.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-th,td{padding:11px 14px;text-align:left;font-size:13.5px;border-bottom:1px solid var(--line)}
-th{background:var(--bg);color:var(--muted);font-weight:600;font-size:12.5px}
-tr:last-child td{border-bottom:0}
-code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-code{background:var(--bg);padding:2px 6px;border-radius:5px;font-size:12.8px;border:1px solid var(--line)}
-pre{background:#0d1117;color:#e6edf3;padding:16px;border-radius:12px;overflow:auto;font-size:13px;line-height:1.6;border:1px solid #26303b}
-pre code{background:none;border:0;color:inherit;padding:0}
-ul.feat{margin:0;padding-left:20px;color:var(--muted);font-size:13.5px}
-ul.feat li{margin:5px 0}
-footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);font-size:13px}
-.foot{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between}
-.note{background:rgba(37,99,235,.08);border-left:3px solid var(--brand);padding:12px 16px;border-radius:8px;font-size:13.5px;color:var(--fg);margin:16px 0}
-.ok{color:var(--ok);font-weight:600}
-@media(max-width:640px){header{padding:36px 0 44px}.brand h1{font-size:24px}}
+.brand img{width:60px;height:60px;border-radius:14px;background:rgba(255,255,255,.15);padding:6px}
+.brand h1{margin:0;font-size:28px}
+.brand p{margin:2px 0 0;opacity:.9;font-size:13.5px}
+.tagline{margin:22px 0 0;font-size:16.5px;opacity:.96;max-width:680px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.badge{padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.18);font-size:12px}
+main{padding:36px 0 60px}
+h2{font-size:18px;margin:34px 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.download{display:flex;align-items:center;gap:20px;flex-wrap:wrap;border:2px solid var(--accent)}
+.download .info{flex:1;min-width:240px}
+.download h3{margin:0 0 6px;font-size:17px}
+.download p{margin:0;color:var(--muted);font-size:13.5px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--radius);background:var(--accent);color:#fff;font-weight:600;font-size:14.5px}
+.btn:hover{filter:brightness(1.08);text-decoration:none}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.shot{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.shot img{display:block;width:100%;height:auto}
+.shot .cap{padding:9px 12px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.feat h4{margin:0 0 8px;font-size:14.5px}
+.feat ul{margin:0;padding-left:18px;color:var(--muted);font-size:13px}
+.feat li{margin:4px 0}
+ol{padding-left:20px}ol li{margin:6px 0;font-size:13.5px}
+code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:2px 6px;font-size:12.5px}
+.changelog h3{margin:0 0 8px;font-size:15px}
+.changelog ul{margin:0 0 16px;padding-left:18px;color:var(--muted);font-size:13px}
+footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);font-size:12.5px;text-align:center}
 </style>
 </head>
 <body>
@@ -56,179 +52,105 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
       <img src="logo.svg" alt="YCFMG">
       <div>
         <h1>YCFMG</h1>
-        <p>文件管理 · 智能图库</p>
+        <p>飞牛 NAS 文件管理 · 智能图库</p>
       </div>
     </div>
-    <p class="tagline">用文件管理器的自由度，配图库的检索体验。<br>真实目录零搬迁，以图搜图、以文搜图、自动分类标签，专属分享页与多域名绑定。</p>
+    <p class="tagline">用文件管理器的自由度，配图库的检索体验。真实目录零搬迁，以图搜图、以文搜图、自动分类标签，专属分享页与多域名绑定。</p>
     <div class="badges">
-      <span class="badge">版本 fmg2609.004</span>
-      <span class="badge">飞牛 fnOS / 通用 NAS / VPS</span>
-      <span class="badge">fpk · 二进制 · Docker</span>
-      <span class="badge">MIT 开源</span>
+      <span class="badge">版本 fmg2609.005</span>
+      <span class="badge">飞牛 fnOS 专用</span>
+      <span class="badge">安装即用，无需登录</span>
     </div>
   </div>
 </header>
 
 <main class="wrap">
-  <h2>下载</h2>
-  <div class="grid">
-    <div class="card primary">
-      <h3>飞牛 fnOS 应用包（fpk）</h3>
-      <p>在飞牛 NAS 的「应用中心 → 手动安装」中选择该文件即可完成安装与开机自启。</p>
-      <div class="actions">
-        <a class="btn" href="files/YCFMG_fmg2609.004.fpk" download>下载 fpk（{{SIZE_FPK}}）</a>
-        <a class="btn ghost" href="#install-fnos">安装说明</a>
-      </div>
+  <h2>下载安装</h2>
+  <div class="card download">
+    <div class="info">
+      <h3>YCFMG 飞牛应用包</h3>
+      <p>在飞牛 NAS 的「应用中心 → 手动安装」中选择该文件，安装向导里填好账号密码即可。</p>
     </div>
-
-    <div class="card">
-      <h3>Docker 镜像</h3>
-      <p>多架构支持，适合群晖、飞牛 Docker、VPS 与任意 Linux。</p>
-      <div class="actions">
-        <a class="btn ghost" href="#install-docker">查看命令</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>静态二进制</h3>
-      <p>无运行时依赖的单文件，适合 systemd 部署与离线环境。</p>
-      <div class="actions">
-        <a class="btn ghost" href="#binaries">选择平台</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>源码</h3>
-      <p>Go 后端 + 原生前端，无构建步骤，克隆后即可编译。</p>
-      <div class="actions">
-        <a class="btn ghost" href="https://github.com/YCyingchen/YCFMG" target="_blank" rel="noopener">GitHub 仓库</a>
-      </div>
-    </div>
+    <a class="btn" href="files/YCFMG_fmg2609.005.fpk" download>下载 fpk（{{SIZE_FPK}}）</a>
   </div>
-
-  <h2 id="binaries">二进制下载</h2>
-  <table>
-    <thead><tr><th>平台</th><th>架构</th><th>文件</th><th>大小</th></tr></thead>
-    <tbody>
-      <tr><td>Linux</td><td>x86_64</td><td><a href="files/ycfmg-fmg2609.004-linux-amd64.tar.gz" download>ycfmg-fmg2609.004-linux-amd64.tar.gz</a></td><td>{{SIZE_LINUX_AMD64_TGZ}}</td></tr>
-      <tr><td>Linux</td><td>arm64</td><td><a href="files/ycfmg-fmg2609.004-linux-arm64.tar.gz" download>ycfmg-fmg2609.004-linux-arm64.tar.gz</a></td><td>{{SIZE_LINUX_ARM64_TGZ}}</td></tr>
-      <tr><td>Linux（裸二进制）</td><td>x86_64</td><td><a href="files/ycfmg-linux-amd64" download>ycfmg-linux-amd64</a></td><td>{{SIZE_LINUX_AMD64}}</td></tr>
-      <tr><td>Linux（裸二进制）</td><td>arm64</td><td><a href="files/ycfmg-linux-arm64" download>ycfmg-linux-arm64</a></td><td>{{SIZE_LINUX_ARM64}}</td></tr>
-      <tr><td>Windows</td><td>x86_64</td><td><a href="files/ycfmg-windows-amd64.exe" download>ycfmg-windows-amd64.exe</a></td><td>{{SIZE_WIN}}</td></tr>
-      <tr><td>macOS</td><td>Intel</td><td><a href="files/ycfmg-darwin-amd64" download>ycfmg-darwin-amd64</a></td><td>{{SIZE_DARWIN_AMD64}}</td></tr>
-      <tr><td>macOS</td><td>Apple Silicon</td><td><a href="files/ycfmg-darwin-arm64" download>ycfmg-darwin-arm64</a></td><td>{{SIZE_DARWIN_ARM64}}</td></tr>
-    </tbody>
-  </table>
-
-  <h2 id="install-fnos">飞牛 fnOS 安装</h2>
-  <div class="note">该应用包符合飞牛开发者规范（manifest / cmd 生命周期脚本 / config 权限与资源声明 / wizard），安装后由应用中心统一管理启停与升级。</div>
   <ol>
-    <li>下载 <code>YCFMG_fmg2609.004.fpk</code>；</li>
-    <li>打开飞牛 NAS →「应用中心」→「手动安装」，选择该 fpk 文件；</li>
-    <li>安装完成后在应用中心启动，浏览器访问 <code>http://设备IP:8686</code>；</li>
-    <li>首次登录使用 <code>admin</code>，初始密码在应用日志（应用中心 → 日志，或 <code>应用数据目录/info.log</code>）中查看，并请立即修改。</li>
-<p>安装后在飞牛「应用中心」点击 YCFMG 图标即可在桌面窗口内直接打开，无需手动输入地址。</p>
-
+    <li>下载上方的 <code>.fpk</code> 文件；</li>
+    <li>飞牛 NAS →「应用中心」→「手动安装」→ 选择该文件；</li>
+    <li>安装向导中填写管理员账号、密码、服务端口；</li>
+    <li>安装完成后在应用中心点击图标即可在桌面窗口内打开，默认端口 <code>8686</code>。</li>
   </ol>
 
-      <h2 id="install-docker">Docker 部署（Compose）</h2>
-  <p>新建一个目录，放入下面的 <code>docker-compose.yml</code>，执行 <code>docker compose up -d</code> 即可。</p>
-<pre><code>services:
-  ycfmg:
-    image: ycyingchen/ycfmg:fmg2609.004   # 镜像，支持 amd64 / arm64
-    container_name: ycfmg                 # 容器名
-    restart: unless-stopped               # 开机自启
-    ports:
-      - "8686:8686"                       # 左边可改成别的端口，如 "9000:8686"
-    environment:
-      TZ: Asia/Shanghai                   # 时区
-      YCFMG_ADMIN_PASSWORD: "改成你的密码"  # 管理员密码
-      YCFMG_UPDATE_PROXY: "http://127.0.0.1:7890"  # 在线更新用的代理，可留空
-    volumes:
-      - ./config:/config                  # 配置与数据库，务必保留
-      - /vol1/1000:/data                  # 要管理的目录，可挂多个</code></pre>
-  <p>访问 <code>http://设备IP:8686</code>，账号 <code>admin</code>，密码为上一步填写的值。</p>
-  <p>常用命令：<code>docker compose up -d</code> 启动，<code>docker compose logs -f</code> 看日志，<code>docker compose down</code> 停止。</p>
+  <h2>界面预览</h2>
+  <div class="shots">
+    <div class="shot"><img src="preview/01-文件管理.png" alt="文件管理"><div class="cap">文件管理：Windows 资源管理器式布局</div></div>
+    <div class="shot"><img src="preview/02-图库.png" alt="图库"><div class="cap">智能图库：时间线瀑布流与分类筛选</div></div>
+    <div class="shot"><img src="preview/03-设置.png" alt="设置"><div class="cap">设置：索引、域名、在线更新</div></div>
+    <div class="shot"><img src="preview/04-分享页.png" alt="分享页"><div class="cap">专属分享页：无需登录即可查看</div></div>
+  </div>
 
-  
-        <h2 id="changelog">更新记录</h2>
-  <div class="card">
-    <h3>fmg2609.004 <span class="badge">最新</span></h3>
-    <ul class="feat">
-      <li>安装向导填写的参数会写入安装日志，便于定位登录问题</li>
-      <li>修正改用户名场景：库里已有账号时创建新管理员，不再静默失败</li>
-      <li>修正一次性重置标记，不再覆盖你在应用内改的密码</li>
-    </ul>
-  </div>
-  <div class="card">
-    <h3>fmg2609.003</h3>
-    <ul class="feat">
-      <li>修复向导密码不生效：启动环境变量未导出 + 特殊字符转义</li>
-      <li>密码 / 域名 / 代理改用 base64 传递</li>
-    </ul>
-  </div>
-  <div class="card">
-    <h3>fmg2609.001 - 002</h3>
-    <ul class="feat">
-      <li>首个版本与安装向导、桌面入口、多架构镜像、在线更新、下载站</li>
-    </ul>
-  </div>
-<h2 id="updater">应用内在线更新</h2>
-  <p>在应用「设置 → 在线更新」可一键检查新版本，检查顺序为：官方下载站 version.json、GitHub Release、Docker Hub 标签。</p>
-  <p>GitHub 与 Docker Hub 在境内通常需要代理，可在同一面板填写，例如 http://127.0.0.1:7890，也可用环境变量 YCFMG_UPDATE_PROXY 配置。</p>
-<h2>功能特性</h2>
-  <div class="grid">
-    <div class="card">
-      <h3>Windows 式文件管理</h3>
-      <ul class="feat">
-        <li>导航窗格 + 面包屑 + 工具栏 + 详细信息面板</li>
+  <h2>功能特性</h2>
+  <div class="feats">
+    <div class="card feat">
+      <h4>文件管理</h4>
+      <ul>
+        <li>导航窗格 + 面包屑 + 命令栏 + 详细信息面板</li>
+        <li>大图标 / 平铺 / 列表 / 详细信息 四种视图</li>
         <li>多选、右键菜单、快捷键、拖拽移动</li>
         <li>上传（含文件夹）、回收站与恢复</li>
       </ul>
     </div>
-    <div class="card">
-      <h3>智能图库</h3>
-      <ul class="feat">
+    <div class="card feat">
+      <h4>智能图库</h4>
+      <ul>
         <li>时间线瀑布流，按日分组</li>
         <li>EXIF：拍摄时间、相机、镜头、GPS</li>
-        <li>16 类自动分类与自动标签</li>
+        <li>自动分类与标签，可按分类 / 色调筛选</li>
+        <li>重复图检测</li>
       </ul>
     </div>
-    <div class="card">
-      <h3>以图搜图 / 以文搜图</h3>
-      <ul class="feat">
+    <div class="card feat">
+      <h4>以图搜图 / 以文搜图</h4>
+      <ul>
         <li>感知哈希 + 颜色直方图，零模型依赖</li>
         <li>中文分词 + 同义词扩展 + 字段加权</li>
-        <li>重复图检测与相似聚合</li>
+        <li>拖一张图进搜索框即可找相似</li>
       </ul>
     </div>
-    <div class="card">
-      <h3>分享与多域名</h3>
-      <ul class="feat">
-        <li>专属分享页 + 灯箱 + 打包下载</li>
-        <li>提取密码、有效期、下载次数限制</li>
+    <div class="card feat">
+      <h4>分享与多域名</h4>
+      <ul>
+        <li>专属分享页，支持密码与有效期</li>
         <li>绑定多个域名，链接随访问域名自动切换</li>
+        <li>访问统计与打包下载</li>
       </ul>
     </div>
   </div>
 
-  <h2>默认端口与访问</h2>
-  <table>
-    <thead><tr><th>项目</th><th>说明</th></tr></thead>
-    <tbody>
-      <tr><td>HTTP 端口</td><td><code>8686</code></td></tr>
-      <tr><td>数据目录</td><td>Docker：<code>/config/ycfmg</code>；fpk：应用数据目录（<code>TRIM_PKGVAR</code>）</td></tr>
-      <tr><td>默认账号</td><td><code>admin</code>（初始密码见首次启动日志）</td></tr>
-      <tr><td>反代支持</td><td>识别 <code>X-Forwarded-Proto/Host</code>，支持子路径部署</td></tr>
-    </tbody>
-  </table>
+  <h2>更新记录</h2>
+  <div class="card changelog">
+    <h3>fmg2609.005</h3>
+    <ul>
+      <li>文件管理界面按 Windows 资源管理器重做：地址行、命令栏、行内操作</li>
+      <li>图库的分类与色调筛选合并到工具栏，不再占用内容区</li>
+      <li>取消登录：安装后直接进入，无需输入账号密码</li>
+      <li>修复文件大小显示异常与图标尺寸问题</li>
+      <li>仅保留飞牛 fpk 一种分发形式</li>
+    </ul>
+    <h3>fmg2609.003 - 004</h3>
+    <ul>
+      <li>修复安装向导密码不生效、改用户名无法登录</li>
+      <li>安装向导参数写入日志，便于排查</li>
+    </ul>
+    <h3>fmg2609.001 - 002</h3>
+    <ul>
+      <li>首个版本：文件管理 + 智能图库、以图搜图、以文搜图、分享页</li>
+      <li>安装向导、桌面入口</li>
+    </ul>
+  </div>
 </main>
 
 <footer>
-  <div class="wrap foot">
-    <div>YCFMG fmg2609.004 · MIT License · 构建时间 {{BUILD_TIME}}</div>
-    <div><a href="https://github.com/YCyingchen/YCFMG" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/YCyingchen/YCFMG/blob/main/docs/部署指南.md" target="_blank" rel="noopener">部署指南</a></div>
-  </div>
+  <div class="wrap">YCFMG fmg2609.005 · MIT License · 构建时间 {{BUILD_TIME}}</div>
 </footer>
 </body>
 </html>

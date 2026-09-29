@@ -31,7 +31,7 @@
     n = Number(n) || 0;
     if (n < 1024) { return n + " B"; }
     var units = ["KB", "MB", "GB", "TB", "PB"];
-    var v = n / 1024, i = -1;
+    var v = n, i = -1;
     while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
     return (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + " " + units[i];
   }
