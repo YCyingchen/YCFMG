@@ -1,0 +1,51 @@
+# YCFMG 配置示例（复制为 config.yaml 后按需修改）
+server:
+  host: 0.0.0.0
+  port: 8686
+  base_path: ""
+  trust_proxy: true
+  public_urls:
+    - http://192.168.1.8:8686
+    - https://fm.example.com
+data_dir: /opt/ycfmg/data
+libraries:
+  - name: 照片
+    path: /vol1/1000/Photos
+    readonly: false
+    index: true
+  - name: 下载
+    path: /vol1/1000/Downloads
+    readonly: true
+    index: true
+auth:
+  username: admin
+  password: ""
+  session_ttl_hours: 1728
+index:
+  enabled: true
+  scan_interval_minutes: 360
+  thumb_sizes: [256, 768]
+  auto_tags: true
+  hash_tolerance: 6
+  max_file_mb: 512
+share:
+  default_expire_days: 7
+  max_items: 2000
+  allow_download: true
+  brand_name: YCFMG
+  brand_subtitle: 文件管理 · 智能图库
+semantic:
+  enabled: false
+  endpoint: ""
+  api_key: ""
+  model: clip-vit-base-patch32
+log_level: info
+# 在线更新检查（应用内「设置 → 在线更新」）
+update:
+  enabled: true
+  check_interval_hours: 12
+  download_page: https://ycfmg.202693.xyz
+  proxy: ""
+  github_repo: YCyingchen/YCFMG
+  docker_repo: ycyingchen/ycfmg
+  sources: []

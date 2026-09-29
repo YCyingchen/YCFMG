@@ -129,7 +129,25 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
     <li>首次登录使用 <code>admin</code>，初始密码在应用日志（应用中心 → 日志，或 <code>应用数据目录/info.log</code>）中查看，并请立即修改。</li>
   </ol>
 
-  <h2 id="install-docker">Docker 部署</h2><p>新建一个目录，放入 `docker-compose.yml`，然后执行 `docker compose up -d`。</p><pre><code>services:  ycfmg:    image: ycyingchen/ycfmg:fmg2609.001    container_name: ycfmg    restart: unless-stopped    ports:      - "8686:8686"    environment:      TZ: Asia/Shanghai      YCFMG_ADMIN_PASSWORD: "改成你的密码"      YCFMG_PUBLIC_URLS: "http://192.168.1.8:8686"    volumes:      - ./config:/config      - /vol1/1000:/data</code></pre><p>启动后访问 `http://设备IP:8686`，账号 `admin`，密码为上面填写的值。</p>  <h2 id="changelog">更新记录</h2>
+    <h2 id="install-docker">Docker 部署</h2>
+  <p>新建一个目录，放入下面的 <code>docker-compose.yml</code>，然后执行 <code>docker compose up -d</code>。</p>
+<pre><code>services:
+  ycfmg:
+    image: ycyingchen/ycfmg:fmg2609.001
+    container_name: ycfmg
+    restart: unless-stopped
+    ports:
+      - "8686:8686"
+    environment:
+      TZ: Asia/Shanghai
+      YCFMG_ADMIN_PASSWORD: "改成你的密码"
+      YCFMG_UPDATE_PROXY: "http://192.168.1.8:7890"
+    volumes:
+      - ./config:/config
+      - /vol1/1000:/data</code></pre>
+  <p>访问 <code>http://设备IP:8686</code>，账号 <code>admin</code>，密码为上一步填写的值。</p>
+  <p>常用命令：<code>docker compose logs -f</code> 看日志，<code>docker compose down</code> 停止。</p>
+  <h2 id="changelog">更新记录</h2>
   <div class="card">
     <h3>fmg2609.001 <span class="badge">最新</span></h3>
     <ul class="feat">
