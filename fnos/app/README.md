@@ -67,24 +67,14 @@ YCFMG（**Y**ing**C**hen **F**ile **M**anager & **G**allery）把「传统文件
 
 ## 快速开始
 
-### Docker（推荐）
+### Docker Compose（推荐）
 ```bash
-docker run -d --name ycfmg \
-  -p 8686:8686 \
-  -e YCFMG_ADMIN_PASSWORD="你的强密码" \
-  -e YCFMG_PUBLIC_URLS="http://192.168.1.8:8686,https://fm.example.com" \
-  -v /vol1/1000/Photos:/data/photos \
-  -v /vol1/1000/ycfmg:/config \
-  --restart unless-stopped \
-  ycyingchen/ycfmg:fmg2609.001
-```
-打开 `http://<设备IP>:8686`。
-
-### Docker Compose
-```bash
-cd docker && docker compose up -d
+mkdir -p /vol1/1000/ycfmg && cd /vol1/1000/ycfmg
+curl -O https://raw.githubusercontent.com/YCyingchen/YCFMG/main/docker/docker-compose.yml
+docker compose up -d
 ```
 
+打开 `http://<设备IP>:8686`，账号 `admin`，密码为 compose 里填写的 `YCFMG_ADMIN_PASSWORD`。
 ### 二进制
 ```bash
 bash scripts/build.sh                      # 构建全部平台

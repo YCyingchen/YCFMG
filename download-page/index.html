@@ -129,7 +129,23 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
     <li>首次登录使用 <code>admin</code>，初始密码在应用日志（应用中心 → 日志，或 <code>应用数据目录/info.log</code>）中查看，并请立即修改。</li>
   </ol>
 
-  <h2 id="install-docker">Docker 部署</h2><p>新建一个目录，放入 `docker-compose.yml`，然后执行 `docker compose up -d`。</p><pre><code>services:  ycfmg:    image: ycyingchen/ycfmg:fmg2609.001    container_name: ycfmg    restart: unless-stopped    ports:      - "8686:8686"    environment:      TZ: Asia/Shanghai      YCFMG_ADMIN_PASSWORD: "改成你的密码"      YCFMG_PUBLIC_URLS: "http://192.168.1.8:8686"    volumes:      - ./config:/config      - /vol1/1000:/data</code></pre><p>启动后访问 `http://设备IP:8686`，账号 `admin`，密码为上面填写的值。</p><h2>功能特性</h2>
+  <h2 id="install-docker">Docker 部署</h2><p>新建一个目录，放入 `docker-compose.yml`，然后执行 `docker compose up -d`。</p><pre><code>services:  ycfmg:    image: ycyingchen/ycfmg:fmg2609.001    container_name: ycfmg    restart: unless-stopped    ports:      - "8686:8686"    environment:      TZ: Asia/Shanghai      YCFMG_ADMIN_PASSWORD: "改成你的密码"      YCFMG_PUBLIC_URLS: "http://192.168.1.8:8686"    volumes:      - ./config:/config      - /vol1/1000:/data</code></pre><p>启动后访问 `http://设备IP:8686`，账号 `admin`，密码为上面填写的值。</p>  <h2 id="changelog">更新记录</h2>
+  <div class="card">
+    <h3>fmg2609.001 <span class="badge">最新</span></h3>
+    <ul class="feat">
+      <li>新增在线更新检查：支持官方下载站、GitHub Release、Docker Hub 三种源，每个源可单独配置 HTTP 代理</li>
+      <li>fpk 安装包按飞牛官方 fnpack 规范重做：app / cmd 九个生命周期脚本 / config 权限与资源 / wizard / INI manifest</li>
+      <li>Docker 部署文档统一为 docker compose</li>
+      <li>Docker 镜像支持多架构 linux/amd64 与 linux/arm64（交叉编译，无需 qemu）</li>
+      <li>新增静态下载站与一键发布脚本</li>
+      <li>修复按需索引后标签计数不刷新的问题</li>
+    </ul>
+  </div>
+
+  <h2 id="updater">应用内在线更新</h2>
+  <p>在应用「设置 → 在线更新」可一键检查新版本，检查顺序为：官方下载站 version.json、GitHub Release、Docker Hub 标签。</p>
+  <p>GitHub 与 Docker Hub 在境内通常需要代理，可在同一面板填写，例如 http://192.168.1.8:7890，也可用环境变量 YCFMG_UPDATE_PROXY 配置。</p>
+<h2>功能特性</h2>
   <div class="grid">
     <div class="card">
       <h3>Windows 式文件管理</h3>

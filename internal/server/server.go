@@ -120,6 +120,11 @@ func (s *Server) routes() {
 	m.HandleFunc("DELETE /api/shares/{id}", s.auth(s.hShareDelete))
 	m.HandleFunc("GET /api/shares/{id}/links", s.auth(s.hShareLinks))
 
+	m.HandleFunc("GET /api/update", s.auth(s.hUpdateCheck))
+	m.HandleFunc("POST /api/update/check", s.auth(s.hUpdateCheck))
+	m.HandleFunc("GET /api/update/config", s.auth(s.hUpdateConfig))
+	m.HandleFunc("POST /api/update/config", s.auth(s.hUpdateConfigSave))
+
 	m.HandleFunc("GET /api/stats", s.auth(s.hStats))
 	m.HandleFunc("GET /api/libraries", s.auth(s.hLibraries))
 	m.HandleFunc("GET /api/index/status", s.auth(s.hIndexStatus))

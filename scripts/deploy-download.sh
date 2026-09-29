@@ -21,6 +21,7 @@ mkdir -p "$FILES"
 cp "$ROOT/download-page/index.html" "$STAGE/index.html"
 cp "$ROOT/download-page/logo.svg" "$STAGE/logo.svg"
 cp "$ROOT/download-page/README.txt" "$STAGE/README.txt" 2>/dev/null || true
+cp "$ROOT/download-page/version.json" "$STAGE/version.json" 2>/dev/null || true
 [ -f "$ROOT/dist/YCFMG_$VERSION.fpk" ] && cp "$ROOT/dist/YCFMG_$VERSION.fpk" "$FILES/"
 for f in "$ROOT/dist"/*.tar.gz "$ROOT/dist"/ycfmg-linux-amd64 "$ROOT/dist"/ycfmg-linux-arm64 \
          "$ROOT/dist"/ycfmg-windows-amd64.exe "$ROOT/dist"/ycfmg-darwin-amd64 "$ROOT/dist"/ycfmg-darwin-arm64; do
@@ -73,7 +74,7 @@ ssh_run() { setsid -w ssh $SSH_OPTS "$USER@$HOST" "$@"; }
 scp_run() { setsid -w scp $SSH_OPTS "$@"; }
 
 ssh_run "mkdir -p "$DEST/files""
-scp_run "$STAGE/index.html" "$STAGE/logo.svg" "$STAGE/README.txt" "$USER@$HOST:$DEST/"
+scp_run "$STAGE/index.html" "$STAGE/logo.svg" "$STAGE/README.txt" "$STAGE/version.json" "$USER@$HOST:$DEST/"
 scp_run "$FILES"/* "$USER@$HOST:$DEST/files/"
 # 规范化远端权限，保证后续可覆盖更新且可被 Web 服务读取
 ssh_run "chmod -R u+rwX "$DEST" && find "$DEST" -type d -exec chmod 755 {} \; && find "$DEST" -type f -exec chmod 644 {} \;"

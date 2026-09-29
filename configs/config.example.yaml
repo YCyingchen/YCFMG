@@ -40,3 +40,12 @@ semantic:
   api_key: ""
   model: clip-vit-base-patch32
 log_level: info
+# 在线更新检查（应用内「设置 → 在线更新」）
+update:
+  enabled: true
+  check_interval_hours: 12
+  download_page: https://ycfmg.202693.xyz
+  proxy: ""
+  github_repo: YCyingchen/YCFMG
+  docker_repo: ycyingchen/ycfmg
+  sources: []

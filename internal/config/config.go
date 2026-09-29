@@ -80,6 +80,7 @@ type Config struct {
 	Share     Share
 	Semantic  Semantic
 	LogLevel  string
+	Update    UpdateConfig
 	path      string
 }
 
@@ -140,6 +141,7 @@ func (c *Config) Path() string { return c.path }
 // Load 读取配置文件（不存在则创建默认文件），随后应用环境变量覆盖。
 func Load(path string) (*Config, error) {
 	cfg := Default()
+	cfg.Update = DefaultUpdate()
 	cfg.path = path
 
 	if path == "" {
@@ -253,6 +255,7 @@ func (c *Config) apply(m map[string]any) {
 		c.Semantic.TimeoutSec = num(s["timeout_sec"], c.Semantic.TimeoutSec)
 	}
 	c.LogLevel = str(m["log_level"], c.LogLevel)
+	c.parseUpdate(m)
 }
 
 func (c *Config) applyEnv() {

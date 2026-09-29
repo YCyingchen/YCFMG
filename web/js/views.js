@@ -456,6 +456,7 @@
       b6.onclick = async function () { await API.logout(); location.reload(); };
       p5.appendChild(b6);
       grid.appendChild(p5);
+      if (window.UpdatePanel) { window.UpdatePanel.render(grid); }
     } catch (e) { }
   }
   App.renderSettings = renderSettings;

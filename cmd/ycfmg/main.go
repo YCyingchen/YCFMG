@@ -2,211 +2,229 @@
 package main
 
 import (
-    "context"
-    "flag"
-    "fmt"
-    "net/http"
-    "os"
-    "os/signal"
-    "runtime"
-    "syscall"
-    "time"
+	"context"
+	"flag"
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"runtime"
+	"syscall"
+	"time"
 
-    "github.com/ycyingchen/ycfmg/internal/auth"
-    "github.com/ycyingchen/ycfmg/internal/config"
-    "github.com/ycyingchen/ycfmg/internal/fsapi"
-    "github.com/ycyingchen/ycfmg/internal/indexer"
-    "github.com/ycyingchen/ycfmg/internal/logx"
-    "github.com/ycyingchen/ycfmg/internal/search"
-    "github.com/ycyingchen/ycfmg/internal/server"
-    "github.com/ycyingchen/ycfmg/internal/share"
-    "github.com/ycyingchen/ycfmg/internal/store"
-    "github.com/ycyingchen/ycfmg/internal/thumbs"
-    "github.com/ycyingchen/ycfmg/internal/version"
-    webassets "github.com/ycyingchen/ycfmg/web"
+	"github.com/ycyingchen/ycfmg/internal/auth"
+	"github.com/ycyingchen/ycfmg/internal/config"
+	"github.com/ycyingchen/ycfmg/internal/fsapi"
+	"github.com/ycyingchen/ycfmg/internal/indexer"
+	"github.com/ycyingchen/ycfmg/internal/logx"
+	"github.com/ycyingchen/ycfmg/internal/search"
+	"github.com/ycyingchen/ycfmg/internal/server"
+	"github.com/ycyingchen/ycfmg/internal/share"
+	"github.com/ycyingchen/ycfmg/internal/store"
+	"github.com/ycyingchen/ycfmg/internal/thumbs"
+	"github.com/ycyingchen/ycfmg/internal/update"
+	"github.com/ycyingchen/ycfmg/internal/version"
+	webassets "github.com/ycyingchen/ycfmg/web"
 )
 
 func main() {
-    var (
-        configPath string
-        portFlag   int
-        dataFlag   string
-        showVer    bool
-        scanNow    bool
-    )
-    flag.StringVar(&configPath, "config", "config.yaml", "配置文件路径")
-    flag.IntVar(&portFlag, "port", 0, "监听端口（覆盖配置文件）")
-    flag.StringVar(&dataFlag, "data", "", "数据目录（覆盖配置文件）")
-    flag.BoolVar(&showVer, "version", false, "打印版本号后退出")
-    flag.BoolVar(&scanNow, "scan", false, "启动后立即执行一次全量索引")
-    flag.Parse()
+	var (
+		configPath string
+		portFlag   int
+		dataFlag   string
+		showVer    bool
+		scanNow    bool
+	)
+	flag.StringVar(&configPath, "config", "config.yaml", "配置文件路径")
+	flag.IntVar(&portFlag, "port", 0, "监听端口（覆盖配置文件）")
+	flag.StringVar(&dataFlag, "data", "", "数据目录（覆盖配置文件）")
+	flag.BoolVar(&showVer, "version", false, "打印版本号后退出")
+	flag.BoolVar(&scanNow, "scan", false, "启动后立即执行一次全量索引")
+	flag.Parse()
 
-    if showVer {
-        fmt.Printf("YCFMG %s (%s, %s, %s)\n", version.Version, version.Commit, runtime.GOOS+"/"+runtime.GOARCH, version.BuildTime)
-        return
-    }
+	if showVer {
+		fmt.Printf("YCFMG %s (%s, %s, %s)\n", version.Version, version.Commit, runtime.GOOS+"/"+runtime.GOARCH, version.BuildTime)
+		return
+	}
 
-    cfg, err := config.Load(configPath)
-    if err != nil {
-        fmt.Fprintln(os.Stderr, "配置加载失败:", err)
-        os.Exit(1)
-    }
-    if portFlag > 0 {
-        cfg.Server.Port = portFlag
-    }
-    if dataFlag != "" {
-        cfg.DataDir = dataFlag
-    }
-    logx.SetLevel(logx.ParseLevel(cfg.LogLevel))
-    logx.Infof("YCFMG %s 启动中 ...", version.Version)
+	cfg, err := config.Load(configPath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "配置加载失败:", err)
+		os.Exit(1)
+	}
+	if portFlag > 0 {
+		cfg.Server.Port = portFlag
+	}
+	if dataFlag != "" {
+		cfg.DataDir = dataFlag
+	}
+	update.SetCurrent(version.Version)
+	logx.SetLevel(logx.ParseLevel(cfg.LogLevel))
+	logx.Infof("YCFMG %s 启动中 ...", version.Version)
 
-    st, err := store.Open(cfg.DataFile("ycfmg.db"))
-    if err != nil {
-        logx.Errorf("数据库初始化失败: %v", err)
-        os.Exit(1)
-    }
-    defer st.Close()
+	st, err := store.Open(cfg.DataFile("ycfmg.db"))
+	if err != nil {
+		logx.Errorf("数据库初始化失败: %v", err)
+		os.Exit(1)
+	}
+	defer st.Close()
 
-    applyRuntimeSettings(cfg, st)
+	applyRuntimeSettings(cfg, st)
 
-    th := thumbs.New(cfg.ThumbDir(), cfg.Index.ThumbSizes, 82)
-    au := auth.New(cfg, st)
-    if pwd, err := au.EnsureAdmin(); err != nil {
-        logx.Errorf("管理员初始化失败: %v", err)
-    } else if pwd != "" {
-        logx.Infof("首次启动，请使用 admin / %s 登录并尽快修改密码", pwd)
-    }
-    st.CleanSessions()
+	th := thumbs.New(cfg.ThumbDir(), cfg.Index.ThumbSizes, 82)
+	au := auth.New(cfg, st)
+	if pwd, err := au.EnsureAdmin(); err != nil {
+		logx.Errorf("管理员初始化失败: %v", err)
+	} else if pwd != "" {
+		logx.Infof("首次启动，请使用 admin / %s 登录并尽快修改密码", pwd)
+	}
+	st.CleanSessions()
 
-    ix := indexer.New(cfg, st, th)
-    eng := search.New(cfg, st)
-    shm := share.New(cfg, st, th)
-    fsys := fsapi.New(cfg, st)
+	ix := indexer.New(cfg, st, th)
+	eng := search.New(cfg, st)
+	shm := share.New(cfg, st, th)
+	fsys := fsapi.New(cfg, st)
 
-    srv := server.New(server.Options{
-        Config: cfg, Store: st, Thumbs: th, Index: ix, Engine: eng,
-        Share: shm, Auth: au, FS: fsys, WebFS: webassets.Assets(),
-    })
+	srv := server.New(server.Options{
+		Config: cfg, Store: st, Thumbs: th, Index: ix, Engine: eng,
+		Share: shm, Auth: au, FS: fsys, WebFS: webassets.Assets(),
+	})
 
-    ix.Loop()
-    if cfg.Index.Enabled || scanNow {
-        go func() {
-            if ix.Progress().Running {
-                return
-            }
-            ix.ScanAll(false)
-        }()
-    }
+	ix.Loop()
+	if cfg.Index.Enabled || scanNow {
+		go func() {
+			if ix.Progress().Running {
+				return
+			}
+			ix.ScanAll(false)
+		}()
+	}
 
-    addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
-    httpSrv := &http.Server{
-        Addr:              addr,
-        Handler:           srv.Handler(),
-        ReadHeaderTimeout: 20 * time.Second,
-    }
+	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
+	httpSrv := &http.Server{
+		Addr:              addr,
+		Handler:           srv.Handler(),
+		ReadHeaderTimeout: 20 * time.Second,
+	}
 
-    for _, l := range cfg.Libraries {
-        logx.Infof("文件库: %s -> %s (只读=%v)", l.Name, l.Path, l.ReadOnly)
-    }
-    if len(cfg.Server.PublicURLs) > 0 {
-        logx.Infof("已绑定域名: %v", cfg.Server.PublicURLs)
-    }
-    logx.Infof("访问地址: http://%s:%d%s", displayHost(cfg.Server.Host), cfg.Server.Port, cfg.Server.BasePath)
+	for _, l := range cfg.Libraries {
+		logx.Infof("文件库: %s -> %s (只读=%v)", l.Name, l.Path, l.ReadOnly)
+	}
+	if len(cfg.Server.PublicURLs) > 0 {
+		logx.Infof("已绑定域名: %v", cfg.Server.PublicURLs)
+	}
+	logx.Infof("访问地址: http://%s:%d%s", displayHost(cfg.Server.Host), cfg.Server.Port, cfg.Server.BasePath)
 
-    go func() {
-        var err error
-        if cfg.Server.TLSCert != "" && cfg.Server.TLSKey != "" {
-            logx.Infof("启用 HTTPS")
-            err = httpSrv.ListenAndServeTLS(cfg.Server.TLSCert, cfg.Server.TLSKey)
-        } else {
-            err = httpSrv.ListenAndServe()
-        }
-        if err != nil && err != http.ErrServerClosed {
-            logx.Errorf("HTTP 服务异常退出: %v", err)
-            os.Exit(1)
-        }
-    }()
+	go func() {
+		var err error
+		if cfg.Server.TLSCert != "" && cfg.Server.TLSKey != "" {
+			logx.Infof("启用 HTTPS")
+			err = httpSrv.ListenAndServeTLS(cfg.Server.TLSCert, cfg.Server.TLSKey)
+		} else {
+			err = httpSrv.ListenAndServe()
+		}
+		if err != nil && err != http.ErrServerClosed {
+			logx.Errorf("HTTP 服务异常退出: %v", err)
+			os.Exit(1)
+		}
+	}()
 
-    quit := make(chan os.Signal, 1)
-    signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-    <-quit
-    logx.Infof("正在关闭 ...")
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
-    _ = httpSrv.Shutdown(ctx)
-    ix.Stop()
-    logx.Infof("已退出")
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	logx.Infof("正在关闭 ...")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	_ = httpSrv.Shutdown(ctx)
+	ix.Stop()
+	logx.Infof("已退出")
 }
 
 func displayHost(h string) string {
-    if h == "0.0.0.0" || h == "" || h == "::" {
-        return "127.0.0.1"
-    }
-    return h
+	if h == "0.0.0.0" || h == "" || h == "::" {
+		return "127.0.0.1"
+	}
+	return h
 }
 
 // applyRuntimeSettings 读取数据库中保存的覆盖项（如多域名），使其无需重启即可生效。
 func applyRuntimeSettings(cfg *config.Config, st *store.Store) {
-    if v := st.GetSetting("public_urls", ""); v != "" {
-        parts := []string{}
-        for _, p := range splitList(v) {
-            if p != "" {
-                parts = append(parts, p)
-            }
-        }
-        if len(parts) > 0 {
-            cfg.Server.PublicURLs = parts
-        }
-    }
-    if v := st.GetSetting("brand_name", ""); v != "" {
-        cfg.Share.BrandName = v
-    }
-    if v := st.GetSetting("brand_subtitle", ""); v != "" {
-        cfg.Share.BrandSubtitle = v
-    }
-    if v := st.GetSetting("auto_tags", ""); v == "0" {
-        cfg.Index.AutoTags = false
-    }
-    if v := st.GetSetting("hash_tolerance", ""); v != "" {
-        n := 0
-        for _, c := range v {
-            if c < 0x30 || c > 0x39 {
-                n = 0
-                break
-            }
-            n = n*10 + int(c-0x30)
-        }
-        if n > 0 {
-            cfg.Index.HashTolerance = n
-        }
-    }
+	if v := st.GetSetting("public_urls", ""); v != "" {
+		parts := []string{}
+		for _, p := range splitList(v) {
+			if p != "" {
+				parts = append(parts, p)
+			}
+		}
+		if len(parts) > 0 {
+			cfg.Server.PublicURLs = parts
+		}
+	}
+	if v := st.GetSetting("brand_name", ""); v != "" {
+		cfg.Share.BrandName = v
+	}
+	if v := st.GetSetting("brand_subtitle", ""); v != "" {
+		cfg.Share.BrandSubtitle = v
+	}
+	if v := st.GetSetting("auto_tags", ""); v == "0" {
+		cfg.Index.AutoTags = false
+	}
+	if v := st.GetSetting("update_proxy", ""); v != "" {
+		cfg.Update.Proxy = v
+	}
+	if v := st.GetSetting("update_page", ""); v != "" {
+		cfg.Update.DownloadPage = v
+	}
+	if v := st.GetSetting("update_github", ""); v != "" {
+		cfg.Update.GitHubRepo = v
+	}
+	if v := st.GetSetting("update_docker", ""); v != "" {
+		cfg.Update.DockerRepo = v
+	}
+	if st.GetSetting("update_enabled", "") == "0" {
+		cfg.Update.Enabled = false
+	}
+
+	if v := st.GetSetting("hash_tolerance", ""); v != "" {
+		n := 0
+		for _, c := range v {
+			if c < 0x30 || c > 0x39 {
+				n = 0
+				break
+			}
+			n = n*10 + int(c-0x30)
+		}
+		if n > 0 {
+			cfg.Index.HashTolerance = n
+		}
+	}
 }
 
 func splitList(s string) []string {
-    out := []string{}
-    cur := ""
-    for _, c := range s {
-        if c == 0x2C || c == 0x3B || c == 0x0A {
-            out = append(out, cur)
-            cur = ""
-            continue
-        }
-        cur += string(c)
-    }
-    out = append(out, cur)
-    for i := range out {
-        out[i] = trimSpace(out[i])
-    }
-    return out
+	out := []string{}
+	cur := ""
+	for _, c := range s {
+		if c == 0x2C || c == 0x3B || c == 0x0A {
+			out = append(out, cur)
+			cur = ""
+			continue
+		}
+		cur += string(c)
+	}
+	out = append(out, cur)
+	for i := range out {
+		out[i] = trimSpace(out[i])
+	}
+	return out
 }
 
 func trimSpace(s string) string {
-    start, end := 0, len(s)
-    for start < end && (s[start] == 0x20 || s[start] == 0x09) {
-        start++
-    }
-    for end > start && (s[end-1] == 0x20 || s[end-1] == 0x09) {
-        end--
-    }
-    return s[start:end]
+	start, end := 0, len(s)
+	for start < end && (s[start] == 0x20 || s[start] == 0x09) {
+		start++
+	}
+	for end > start && (s[end-1] == 0x20 || s[end-1] == 0x09) {
+		end--
+	}
+	return s[start:end]
 }

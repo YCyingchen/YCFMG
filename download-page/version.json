@@ -1,0 +1,13 @@
+{
+  "version": "fmg2609.001",
+  "published_at": "2026-09-30",
+  "download": "https://ycfmg.202693.xyz",
+  "notes": [
+    "新增在线更新检查：支持官方下载站、GitHub Release、Docker Hub 三种源，每个源可单独配置 HTTP 代理",
+    "fpk 安装包按飞牛官方 fnpack 规范重做：app / cmd 九个生命周期脚本 / config 权限与资源 / wizard / INI manifest",
+    "Docker 部署文档统一为 docker compose",
+    "Docker 镜像支持多架构 linux/amd64 与 linux/arm64（交叉编译，无需 qemu）",
+    "新增静态下载站与一键发布脚本",
+    "修复按需索引后标签计数不刷新的问题"
+  ]
+}
