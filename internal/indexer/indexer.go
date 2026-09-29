@@ -465,6 +465,8 @@ func (ix *Indexer) IndexDir(dir string, recursive bool) (int, error) {
 			}
 		}
 	}
+	_ = ix.st.RebuildTagCounts()
+
 	parent := filepath.Dir(dir)
 	counts := [2]int{files, images}
 	_ = ix.st.UpsertDir(&store.DirEntry{
