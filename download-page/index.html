@@ -43,6 +43,18 @@ code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding
 .changelog h3{margin:0 0 8px;font-size:15px}
 .changelog ul{margin:0 0 16px;padding-left:18px;color:var(--muted);font-size:13px}
 footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);font-size:12.5px;text-align:center}
+/* 预览图灯箱 */
+.shot img{cursor:zoom-in}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.93);display:none;align-items:center;justify-content:center;z-index:100}
+.lb.on{display:flex}
+.lb img{max-width:94vw;max-height:84vh;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.lb .nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:64px;border:0;border-radius:8px;background:rgba(255,255,255,.12);color:#fff;font-size:26px;line-height:1;cursor:pointer}
+.lb .nav:hover{background:rgba(255,255,255,.22)}
+.lb .prev{left:18px}.lb .next{right:18px}
+.lb .close{position:absolute;top:16px;right:18px;width:40px;height:40px;border:0;border-radius:8px;background:rgba(255,255,255,.12);color:#fff;font-size:20px;cursor:pointer}
+.lb .close:hover{background:rgba(255,255,255,.22)}
+.lb .cap{position:absolute;left:0;right:0;bottom:22px;text-align:center;color:#ddd;font-size:13px}
+.lb .idx{position:absolute;top:20px;left:20px;color:#ddd;font-size:13px}
 </style>
 </head>
 <body>
@@ -57,7 +69,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
     </div>
     <p class="tagline">用文件管理器的自由度，配图库的检索体验。真实目录零搬迁，以图搜图、以文搜图、自动分类标签，专属分享页与多域名绑定。</p>
     <div class="badges">
-      <span class="badge">版本 fmg2609.005</span>
+      <span class="badge">版本 fmg2609.006</span>
       <span class="badge">飞牛 fnOS 专用</span>
       <span class="badge">安装即用，无需登录</span>
     </div>
@@ -71,7 +83,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
       <h3>YCFMG 飞牛应用包</h3>
       <p>在飞牛 NAS 的「应用中心 → 手动安装」中选择该文件，安装向导里填好账号密码即可。</p>
     </div>
-    <a class="btn" href="files/YCFMG_fmg2609.005.fpk" download>下载 fpk（{{SIZE_FPK}}）</a>
+    <a class="btn" href="files/YCFMG_fmg2609.006.fpk" download>下载 fpk（{{SIZE_FPK}}）</a>
   </div>
   <ol>
     <li>下载上方的 <code>.fpk</code> 文件；</li>
@@ -128,7 +140,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
 
   <h2>更新记录</h2>
   <div class="card changelog">
-    <h3>fmg2609.005</h3>
+    <h3>fmg2609.006</h3>
     <ul>
       <li>文件管理界面按 Windows 资源管理器重做：地址行、命令栏、行内操作</li>
       <li>图库的分类与色调筛选合并到工具栏，不再占用内容区</li>
@@ -150,7 +162,51 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
 </main>
 
 <footer>
-  <div class="wrap">YCFMG fmg2609.005 · MIT License · 构建时间 {{BUILD_TIME}}</div>
+  <div class="wrap">YCFMG fmg2609.006 · MIT License · 构建时间 {{BUILD_TIME}}</div>
 </footer>
+<div class="lb" id="lb">
+  <span class="idx" id="lbIdx"></span>
+  <button class="close" id="lbClose" aria-label="关闭">&#10005;</button>
+  <button class="nav prev" id="lbPrev" aria-label="上一张">&#8249;</button>
+  <img id="lbImg" src="" alt="">
+  <button class="nav next" id="lbNext" aria-label="下一张">&#8250;</button>
+  <div class="cap" id="lbCap"></div>
+</div>
+<script>
+(function () {
+  var imgs = [].slice.call(document.querySelectorAll(".shot img"));
+  if (!imgs.length) { return; }
+  var box = document.getElementById("lb");
+  var big = document.getElementById("lbImg");
+  var cap = document.getElementById("lbCap");
+  var idx = document.getElementById("lbIdx");
+  var cur = 0;
+  function caps(i) {
+    var fig = imgs[i].closest(".shot");
+    var c = fig ? fig.querySelector(".cap") : null;
+    return c ? c.textContent : "";
+  }
+  function show(i) {
+    cur = (i + imgs.length) % imgs.length;
+    big.src = imgs[cur].getAttribute("src");
+    big.alt = imgs[cur].getAttribute("alt") || "";
+    cap.textContent = caps(cur);
+    idx.textContent = (cur + 1) + " / " + imgs.length;
+    box.classList.add("on");
+  }
+  function hide() { box.classList.remove("on"); big.src = ""; }
+  imgs.forEach(function (im, i) { im.addEventListener("click", function () { show(i); }); });
+  document.getElementById("lbClose").onclick = hide;
+  document.getElementById("lbPrev").onclick = function (e) { e.stopPropagation(); show(cur - 1); };
+  document.getElementById("lbNext").onclick = function (e) { e.stopPropagation(); show(cur + 1); };
+  box.addEventListener("click", function (e) { if (e.target === box) { hide(); } });
+  document.addEventListener("keydown", function (e) {
+    if (!box.classList.contains("on")) { return; }
+    if (e.key === "Escape") { hide(); }
+    if (e.key === "ArrowLeft") { show(cur - 1); }
+    if (e.key === "ArrowRight") { show(cur + 1); }
+  });
+})();
+</script>
 </body>
 </html>
