@@ -57,7 +57,10 @@ start_process() {
         return 0
     fi
     log_msg "启动 YCFMG，端口 ${PORT}"
-    nohup "${BIN}" --config "${CFG}" --data "${VAR}" --port "${PORT}" >> "${LOG_FILE}" 2>&1 &
+    # --socket：飞牛统一网关从这里转发，桌面点图标走同源 /app/ycfmg，无需任何端口；
+    # --port：保留给分享页使用（分享链接形如 http://设备IP:端口/s/xxxx）。
+    nohup "${BIN}" --config "${CFG}" --data "${VAR}" --port "${PORT}" \
+        --socket "${TRIM_APPDEST}/ycfmg.sock" >> "${LOG_FILE}" 2>&1 &
     echo $! > "${PID_FILE}"
     sleep 2
     if is_running; then

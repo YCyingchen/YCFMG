@@ -5,6 +5,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -33,6 +34,7 @@ func main() {
 		configPath    string
 		portFlag      int
 		sharePortFlag int
+		socketFlag    string
 		dataFlag      string
 		showVer       bool
 		scanNow       bool
@@ -40,6 +42,7 @@ func main() {
 	flag.StringVar(&configPath, "config", "config.yaml", "配置文件路径")
 	flag.IntVar(&portFlag, "port", 0, "监听端口（覆盖配置文件）")
 	flag.IntVar(&sharePortFlag, "share-port", 0, "分享专用端口（0 表示与主端口共用）")
+	flag.StringVar(&socketFlag, "socket", "", "统一网关 Unix Socket 路径（飞牛 fnOS 用）")
 	flag.StringVar(&dataFlag, "data", "", "数据目录（覆盖配置文件）")
 	flag.BoolVar(&showVer, "version", false, "打印版本号后退出")
 	flag.BoolVar(&scanNow, "scan", false, "启动后立即执行一次全量索引")
@@ -60,6 +63,9 @@ func main() {
 	}
 	if sharePortFlag > 0 {
 		cfg.Server.SharePort = sharePortFlag
+	}
+	if socketFlag != "" {
+		cfg.Server.Socket = socketFlag
 	}
 	if dataFlag != "" {
 		cfg.DataDir = dataFlag
@@ -120,6 +126,39 @@ func main() {
 		logx.Infof("已绑定域名: %v", cfg.Server.PublicURLs)
 	}
 	logx.Infof("访问地址: http://%s:%d%s", displayHost(cfg.Server.Host), cfg.Server.Port, cfg.Server.BasePath)
+
+	// 飞牛统一网关：监听 Unix Socket，由网关按 /app/<name> 前缀同源转发，
+	// 桌面点图标因此无需任何端口，也不经过浏览器跳转。
+	if cfg.Server.Socket != "" {
+		_ = os.Remove(cfg.Server.Socket)
+		ln, lerr := net.Listen("unix", cfg.Server.Socket)
+		if lerr != nil {
+			logx.Errorf("统一网关 Socket 监听失败: %v", lerr)
+			os.Exit(1)
+		}
+		_ = os.Chmod(cfg.Server.Socket, 0o666)
+		// 网关转发会保留 /app/ycfmg 前缀，这里剥掉后再进主路由；
+		// TCP 端口不剥前缀，分享页链接保持 http://host:port/s/xxx 的简洁形式。
+		const gatewayPrefix = "/app/ycfmg"
+		inner := srv.Handler()
+		sockSrv := &http.Server{
+			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// 告诉应用它被挂在前缀下，前端据此拼接口地址
+				if strings.HasPrefix(r.URL.Path, gatewayPrefix) {
+					r.Header.Set("X-YCFMG-Gateway-Prefix", gatewayPrefix)
+				}
+				http.StripPrefix(gatewayPrefix, inner).ServeHTTP(w, r)
+			}),
+			ReadHeaderTimeout: 20 * time.Second,
+		}
+		logx.Infof("统一网关入口: %s（对外路径 %s）", cfg.Server.Socket, gatewayPrefix)
+		go func() {
+			if serr := sockSrv.Serve(ln); serr != nil && serr != http.ErrServerClosed {
+				logx.Errorf("网关服务异常退出: %v", serr)
+			}
+		}()
+		defer func() { _ = sockSrv.Close() }()
+	}
 	// 分享专用端口：只放行分享页面与前端静态资源，其余一律 404，
 	// 这样对外只需暴露分享端口，文件管理器本身不必暴露。
 	if cfg.Server.SharePort > 0 && cfg.Server.SharePort != cfg.Server.Port {
@@ -164,6 +203,11 @@ func main() {
 			err = httpSrv.ListenAndServe()
 		}
 		if err != nil && err != http.ErrServerClosed {
+			if cfg.Server.Socket != "" {
+				// 有统一网关兜底时，端口被占用不致命
+				logx.Errorf("HTTP 端口不可用（统一网关仍可访问）: %v", err)
+				return
+			}
 			logx.Errorf("HTTP 服务异常退出: %v", err)
 			os.Exit(1)
 		}

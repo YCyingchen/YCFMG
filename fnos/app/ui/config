@@ -5,8 +5,9 @@
       "icon": "images/icon_{0}.png",
       "type": "iframe",
       "protocol": "",
-      "port": "8686",
-      "url": "/",
+      "gatewayPrefix": "/app/ycfmg",
+      "gatewaySocket": "ycfmg.sock",
+      "url": "/app/ycfmg",
       "allUsers": true
     }
   }

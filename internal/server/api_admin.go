@@ -44,11 +44,21 @@ func (s *Server) hHealth(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// gatewayBase 返回前端应使用的接口前缀：优先取网关注入的挂载前缀。
+func gatewayBase(r *http.Request, fallback string) string {
+	if v := r.Header.Get("X-YCFMG-Gateway-Prefix"); v != "" {
+		return v
+	}
+	return fallback
+}
+
 func (s *Server) hPublic(w http.ResponseWriter, r *http.Request) {
 	okData(w, map[string]any{
-		"brand":            s.cfg.Share.BrandName,
-		"subtitle":         s.cfg.Share.BrandSubtitle,
-		"base_path":        s.cfg.Server.BasePath,
+		"brand":    s.cfg.Share.BrandName,
+		"subtitle": s.cfg.Share.BrandSubtitle,
+		// 经飞牛统一网关访问时，前端必须知道自己的挂载前缀，
+		// 否则 API 会打到站点根目录而 404（页面能开、数据全空）。
+		"base_path":        gatewayBase(r, s.cfg.Server.BasePath),
 		"need_login":       true,
 		"allow_guest":      s.cfg.Auth.AllowGuest,
 		"readonly":         s.cfg.Server.Readonly,

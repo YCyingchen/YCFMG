@@ -2,6 +2,8 @@
 server:
   host: 0.0.0.0
   port: 8686
+  # 飞牛统一网关 Unix Socket（由 fpk 启动脚本传入，通常无需手工配置）
+  socket: 
   # 分享专用端口：填了就用它对外提供分享页（只放行 /s/ 与静态资源）；0 = 关闭
   share_port: 0
   base_path: ""
