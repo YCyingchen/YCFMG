@@ -1,33 +1,48 @@
 #!/bin/bash
-# 安装后：初始化配置目录、数据目录与默认配置
+# 安装后回调：把安装向导中填写的值落地为配置与环境文件
 set -u
 BIN="${TRIM_APPDEST}/bin/ycfmg"
 ETC="${TRIM_PKGETC}"
 VAR="${TRIM_PKGVAR}"
-PORT="${TRIM_SERVICE_PORT:-8686}"
+CFG="${ETC}/config.yaml"
+ENVF="${ETC}/app.env"
+
+USER_NAME="${wizard_username:-admin}"
+USER_PASS="${wizard_password:-}"
+PORT="${wizard_port:-${TRIM_SERVICE_PORT:-8686}}"
+PROXY="${wizard_proxy:-}"
+URLS="${wizard_public_urls:-}"
 
 mkdir -p "${ETC}" "${VAR}/thumbs" "${TRIM_PKGHOME}" 2>/dev/null
 chmod +x "${BIN}" 2>/dev/null
 
-if [ ! -f "${ETC}/config.yaml" ] && [ -f "${TRIM_APPDEST}/etc/config.example.yaml" ]; then
-    cp "${TRIM_APPDEST}/etc/config.example.yaml" "${ETC}/config.yaml"
-    sed -i "s|^  port:.*|  port: ${PORT}|" "${ETC}/config.yaml"
-    sed -i "s|^data_dir:.*|data_dir: ${VAR}|" "${ETC}/config.yaml"
+if [ ! -f "${CFG}" ] && [ -f "${TRIM_APPDEST}/etc/config.example.yaml" ]; then
+    cp "${TRIM_APPDEST}/etc/config.example.yaml" "${CFG}"
 fi
 
-# 把声明过的共享目录加入默认文件库（保持幂等：仅在未配置时写入）
-SHARES="${TRIM_DATA_SHARE_PATHS:-}"
-if [ -n "${SHARES}" ] && [ -f "${ETC}/config.yaml" ]; then
-    if ! grep -q "library" "${ETC}/config.yaml" 2>/dev/null; then
-        {
-            echo "libraries:"
-            echo "  - name: 共享图库"
-            echo "    path: ${SHARES%%:*}"
-            echo "    readonly: false"
-            echo "    index: true"
-        } >> "${ETC}/config.yaml"
+if [ -f "${CFG}" ]; then
+    sed -i "0,/^  port:/s|^  port:.*|  port: ${PORT}|" "${CFG}"
+    sed -i "s|^data_dir:.*|data_dir: ${VAR}|" "${CFG}"
+    if [ -n "${USER_NAME}" ]; then
+        sed -i "0,/^  username:/s|^  username:.*|  username: ${USER_NAME}|" "${CFG}"
+    fi
+    if [ -n "${PROXY}" ]; then
+        sed -i "/^update:/,\$ s|^  proxy:.*|  proxy: \"${PROXY}\"|" "${CFG}"
     fi
 fi
 
-echo "YCFMG 安装完成：配置文件 ${ETC}/config.yaml，数据目录 ${VAR}"
+# 运行时用环境变量注入（不把密码写进 config.yaml）
+{
+    echo "# 由安装向导生成，请勿手工修改（应用设置中可改）"
+    echo "YCFMG_PORT=\"${PORT}\""
+    echo "YCFMG_ADMIN_USER=\"${USER_NAME}\""
+    if [ -n "${USER_PASS}" ]; then echo "YCFMG_ADMIN_PASSWORD=\"${USER_PASS}\""; fi
+    if [ -n "${PROXY}" ]; then echo "YCFMG_UPDATE_PROXY=\"${PROXY}\""; fi
+    if [ -n "${URLS}" ]; then echo "YCFMG_PUBLIC_URLS=\"${URLS}\""; fi
+} > "${ENVF}"
+chmod 600 "${ENVF}"
+
+echo "YCFMG 安装完成：账号 ${USER_NAME}，端口 ${PORT}"
+echo "配置：${CFG}"
+echo "运行数据：${VAR}"
 exit 0

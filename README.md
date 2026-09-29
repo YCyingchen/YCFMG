@@ -3,7 +3,7 @@
   <h1>YCFMG</h1>
   <p><b>文件管理 × 智能图库 —— 一台设备上的 Windows 式文件中心与以图搜图图库</b></p>
   <p>
-    <code>fmg2609.001</code> ·
+    <code>fmg2609.002</code> ·
     <img src="https://img.shields.io/badge/Go-1.27-00ADD8" alt="Go"/>
     <img src="https://img.shields.io/badge/Docker-ycyingchen%2Fycfmg-2496ED" alt="Docker"/>
     <img src="https://img.shields.io/badge/fnOS-fpk-FF6A00" alt="fnOS"/>
@@ -81,7 +81,7 @@ compose 文件内容（可直接复制）：
 # 用法：docker compose up -d
 services:
   ycfmg:
-    image: ycyingchen/ycfmg:fmg2609.001   # 镜像，支持 amd64 / arm64
+    image: ycyingchen/ycfmg:fmg2609.002   # 镜像，支持 amd64 / arm64
     container_name: ycfmg                 # 容器名
     restart: unless-stopped               # 开机自启
     ports:
@@ -90,9 +90,9 @@ services:
       TZ: Asia/Shanghai                   # 时区
       YCFMG_ADMIN_PASSWORD: "改成你的密码"  # 管理员密码（首次启动生效）
       # 多域名：访问者用哪个域名进来，分享链接就用哪个域名生成
-      YCFMG_PUBLIC_URLS: "http://192.168.1.8:8686"
+      YCFMG_PUBLIC_URLS: "http://127.0.0.1:8686"
       # 在线更新检查用的代理，不需要可留空或删除
-      YCFMG_UPDATE_PROXY: "http://192.168.1.8:7890"
+      YCFMG_UPDATE_PROXY: "http://127.0.0.1:7890"
     volumes:
       - ./config:/config                  # 配置与数据库，务必保留
       - /vol1/1000:/data                  # 要管理的目录，可挂多个
@@ -113,7 +113,7 @@ sudo ./dist/ycfmg-linux-amd64 --config /opt/ycfmg/etc/config.yaml
 
 ### 飞牛 NAS（fpk）
 ```bash
-bash scripts/build-fpk.sh                  # 产出 dist/YCFMG_fmg2609.001.fpk
+bash scripts/build-fpk.sh                  # 产出 dist/YCFMG_fmg2609.002.fpk
 ```
 然后在「应用中心 → 手动安装」中选择该文件。
 
@@ -148,7 +148,7 @@ YCFMG/
 
 ## 版本号规则
 
-`fmg<YY><MM>.<NNN>` —— 例如 `fmg2609.001`：
+`fmg<YY><MM>.<NNN>` —— 例如 `fmg2609.002`：
 - `26` 年份（2026 年）
 - `09` 月份（9 月）
 - `001` 当月第几次修改（每次发版递增）
@@ -159,7 +159,7 @@ YCFMG/
 
 | 项 | 结果 |
 | --- | --- |
-| 二进制启动 | `YCFMG fmg2609.001 (dev, linux/amd64, 2026-09-30)` |
+| 二进制启动 | `YCFMG fmg2609.002 (dev, linux/amd64, 2026-09-30)` |
 | 登录 / 会话 | 通过（401 保护生效） |
 | 目录浏览 | 通过（面包屑、目录图片计数正常） |
 | 增量索引 | 通过（5 张测试图入库，跳过未变化文件） |
@@ -183,19 +183,19 @@ YCFMG/
 
 MIT © 2026 ycyingchen
 
-## 交付状态（fmg2609.001）
+## 交付状态（fmg2609.002）
 
 | 交付物 | 位置 / 状态 |
 | --- | --- |
-| 源码仓库 | https://github.com/YCyingchen/YCFMG（main 分支，含 vfmg2609.001 标签） |
-| Docker 镜像 | docker pull ycyingchen/ycfmg:fmg2609.001（linux/amd64，149 MB） |
-| fpk 安装包 | dist/YCFMG_fmg2609.001.fpk（5.4 MB，含 manifest、图标与生命周期脚本） |
+| 源码仓库 | https://github.com/YCyingchen/YCFMG（main 分支，含 vfmg2609.002 标签） |
+| Docker 镜像 | docker pull ycyingchen/ycfmg:fmg2609.002（linux/amd64，149 MB） |
+| fpk 安装包 | dist/YCFMG_fmg2609.002.fpk（5.4 MB，含 manifest、图标与生命周期脚本） |
 | 静态二进制 | dist/ycfmg-linux-amd64 / arm64、darwin-amd64 / arm64、windows-amd64.exe |
-| 已部署实例 | 飞牛 NAS 192.168.1.8:8686（systemd 服务 ycfmg，开机自启） |
+| 已部署实例 | 飞牛 NAS 127.0.0.1:8686（systemd 服务 ycfmg，开机自启） |
 | 验收截图 | docs/screenshots/ 共 9 张 |
 
 > arm64 镜像请在支持 qemu 的机器上执行 `bash scripts/push-docker.sh` 生成多架构 manifest。
 
 ### 已部署实例的初始账号
 
-浏览器打开 http://192.168.1.8:8686 ，使用 `admin` / `mPhIzFbjBUzZ` 登录，并请立即在「设置 → 账号安全」中修改密码。
+浏览器打开 http://127.0.0.1:8686 ，使用 `admin` / `mPhIzFbjBUzZ` 登录，并请立即在「设置 → 账号安全」中修改密码。

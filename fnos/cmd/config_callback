@@ -1,6 +1,40 @@
 #!/bin/bash
-# 配置变更后：重启服务以应用新配置
+# 配置变更后回调：更新环境文件并重启服务
 set -u
+ETC="${TRIM_PKGETC}"
+ENVF="${ETC}/app.env"
+CFG="${ETC}/config.yaml"
+
+PORT="${wizard_port:-${TRIM_SERVICE_PORT:-8686}}"
+USER_NAME="${wizard_username:-}"
+PROXY="${wizard_proxy:-}"
+URLS="${wizard_public_urls:-}"
+
+if [ -n "${USER_NAME}" ] && [ -f "${CFG}" ]; then
+    sed -i "0,/^  username:/s|^  username:.*|  username: ${USER_NAME}|" "${CFG}"
+fi
+if [ -n "${PROXY}" ] && [ -f "${CFG}" ]; then
+    sed -i "/^update:/,\$ s|^  proxy:.*|  proxy: \"${PROXY}\"|" "${CFG}"
+fi
+
+# 合并写入 app.env，保留未修改项
+[ -f "${ENVF}" ] && . "${ENVF}" 2>/dev/null || true
+YCFMG_PORT="${PORT}"
+YCFMG_ADMIN_USER="${USER_NAME:-${YCFMG_ADMIN_USER:-admin}}"
+[ -n "${wizard_password:-}" ] && YCFMG_ADMIN_PASSWORD="${wizard_password}"
+[ -n "${PROXY}" ] && YCFMG_UPDATE_PROXY="${PROXY}"
+[ -n "${URLS}" ] && YCFMG_PUBLIC_URLS="${URLS}"
+
+{
+    echo "# 由应用设置生成"
+    echo "YCFMG_PORT=\"${YCFMG_PORT}\""
+    echo "YCFMG_ADMIN_USER=\"${YCFMG_ADMIN_USER}\""
+    [ -n "${YCFMG_ADMIN_PASSWORD:-}" ] && echo "YCFMG_ADMIN_PASSWORD=\"${YCFMG_ADMIN_PASSWORD}\""
+    [ -n "${YCFMG_UPDATE_PROXY:-}" ] && echo "YCFMG_UPDATE_PROXY=\"${YCFMG_UPDATE_PROXY}\""
+    [ -n "${YCFMG_PUBLIC_URLS:-}" ] && echo "YCFMG_PUBLIC_URLS=\"${YCFMG_PUBLIC_URLS}\""
+} > "${ENVF}"
+chmod 600 "${ENVF}"
+
 bash "${TRIM_APPDEST}/../cmd/main" stop >/dev/null 2>&1 || true
 bash "${TRIM_APPDEST}/../cmd/main" start >/dev/null 2>&1 || true
 exit 0

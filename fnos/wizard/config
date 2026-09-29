@@ -1,0 +1,44 @@
+[
+  {
+    "stepTitle": "账号",
+    "items": [
+      {
+        "type": "text",
+        "field": "wizard_username",
+        "label": "管理员账号",
+        "initValue": "admin"
+      },
+      {
+        "type": "password",
+        "field": "wizard_password",
+        "label": "管理员密码",
+        "helpText": "留空表示不修改密码"
+      }
+    ]
+  },
+  {
+    "stepTitle": "网络与更新",
+    "items": [
+      {
+        "type": "text",
+        "field": "wizard_port",
+        "label": "服务端口",
+        "initValue": "8686"
+      },
+      {
+        "type": "text",
+        "field": "wizard_proxy",
+        "label": "更新检查代理",
+        "initValue": "",
+        "helpText": "GitHub 与 Docker Hub 在境内通常需要代理"
+      },
+      {
+        "type": "text",
+        "field": "wizard_public_urls",
+        "label": "访问域名",
+        "initValue": "",
+        "helpText": "多个域名用英文逗号分隔"
+      }
+    ]
+  }
+]

@@ -1,13 +1,13 @@
 {
-  "version": "fmg2609.001",
+  "version": "fmg2609.002",
   "published_at": "2026-09-30",
   "download": "https://ycfmg.202693.xyz",
   "notes": [
-    "新增在线更新检查：支持官方下载站、GitHub Release、Docker Hub 三种源，每个源可单独配置 HTTP 代理",
-    "fpk 安装包按飞牛官方 fnpack 规范重做：app / cmd 九个生命周期脚本 / config 权限与资源 / wizard / INI manifest",
-    "Docker 部署文档统一为 docker compose",
-    "Docker 镜像支持多架构 linux/amd64 与 linux/arm64（交叉编译，无需 qemu）",
-    "新增静态下载站与一键发布脚本",
-    "修复按需索引后标签计数不刷新的问题"
+    "fpk 新增安装向导：安装时填写管理员账号、密码、服务端口、更新代理与托管域名",
+    "fpk 新增桌面入口，安装后可在飞牛应用中心点击图标直接在桌面窗口内打开",
+    "安装向导的值可在应用设置中随时修改，端口与域名改动自动重启生效",
+    "Docker Compose 示例补齐中文注释，地址统一为 127.0.0.1",
+    "在线更新检查支持下载站 / GitHub Atom / Docker Hub 三源，可分别配置代理",
+    "新增 scripts/bump-version.sh：每次修改自动同步版本号"
   ]
 }

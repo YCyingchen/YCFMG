@@ -13,6 +13,13 @@ log_msg() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "${LOG_FILE}"
 }
 
+load_env() {
+	if [ -f "${TRIM_PKGETC}/app.env" ]; then
+		. "${TRIM_PKGETC}/app.env"
+		PORT="${YCFMG_PORT:-${PORT}}"
+	fi
+}
+
 prepare() {
     mkdir -p "${TRIM_PKGVAR}" "${TRIM_PKGETC}" "${TRIM_PKGVAR}/thumbs" 2>/dev/null
     if [ ! -f "${CFG}" ]; then
@@ -43,6 +50,7 @@ is_running() {
 
 start_process() {
     prepare
+    load_env
     if is_running; then
         log_msg "进程已在运行，跳过启动"
         return 0
