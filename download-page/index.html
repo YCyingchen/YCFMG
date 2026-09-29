@@ -74,6 +74,13 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
 .ver li{margin:5px 0}
 .badge-new{padding:2px 9px;border-radius:999px;background:var(--accent);color:#fff;font-size:11px;font-weight:500}
 .ver-note{color:var(--muted);font-size:12.5px;padding:2px 0 14px}
+/* 更早版本的折叠组 */
+.ver-more{border-top:1px solid var(--line-strong);margin-top:4px}
+.ver-more>summary{color:var(--muted)}
+.ver-more>div{padding-left:14px;border-left:2px solid var(--line);margin:2px 0 10px 6px}
+.ver-more .ver>summary{font-size:13.5px;padding:10px 0}
+.ver-count{font-weight:400;font-size:12.5px;color:var(--muted);margin-left:6px}
+@media(max-width:600px){.ver>summary{font-size:13.5px}.ver .date{display:none}}
 </style>
 </head>
 <body>
@@ -159,7 +166,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
 
   <h2>更新记录</h2>
   <div class="card changelog">
-    <p class="ver-note">点击版本号可展开该版本的更新内容。</p>
+    <p class="ver-note">点击版本号可展开该版本的更新内容；并列展示近期 10 个版本，更早的收在底部折叠组中。</p>
 
     <details class="ver" open>
       <summary>fmg2609.011 <span class="badge-new">最新</span><span class="date">2026-09-30</span></summary>
@@ -346,6 +353,26 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
     if (e.key === "-") { zoomAt(0.8); }
     if (e.key === "0") { resetZoom(); }
   });
+})();
+</script>
+<script>
+/* 更新记录：只并列显示近期 10 个版本，更早的自动收进折叠组 */
+(function () {
+  var RECENT = 10;
+  var box = document.querySelector(".changelog");
+  if (!box) { return; }
+  var vers = [].slice.call(box.querySelectorAll(":scope > details.ver"));
+  if (vers.length <= RECENT) { return; }
+  var old = vers.slice(RECENT);
+  var wrap = document.createElement("details");
+  wrap.className = "ver ver-more";
+  var sum = document.createElement("summary");
+  sum.innerHTML = "更早的版本<span class=\"ver-count\">共 " + old.length + " 个</span>";
+  wrap.appendChild(sum);
+  var inner = document.createElement("div");
+  old.forEach(function (d) { d.open = false; inner.appendChild(d); });
+  wrap.appendChild(inner);
+  box.appendChild(wrap);
 })();
 </script>
 </body>
