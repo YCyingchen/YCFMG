@@ -28,4 +28,4 @@ lucky 反代目标指向本目录所在的静态服务即可，
 检查顺序：本页 version.json → GitHub Release → Docker Hub 标签。
 GitHub 与 Docker Hub 在境内通常需要代理，在应用「设置 → 在线更新」中填写即可。
 
-版本：fmg2609.008
+版本：fmg2609.009
