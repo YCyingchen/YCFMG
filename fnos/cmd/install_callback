@@ -1,53 +1,15 @@
 #!/bin/bash
-# 安装后回调：把安装向导中填写的账号、密码、端口、代理、域名落地
+# 安装后回调：初始化配置与数据目录（无安装向导，安装后开箱即用）
 set -u
 BIN="${TRIM_APPDEST}/bin/ycfmg"
 ETC="${TRIM_PKGETC}"
 VAR="${TRIM_PKGVAR}"
 CFG="${ETC}/config.yaml"
 ENVF="${ETC}/app.env"
-LOG="${VAR}/info.log"
-
-USER_NAME="${wizard_username:-admin}"
-USER_PASS="${wizard_password:-}"
-PORT="${wizard_port:-${TRIM_SERVICE_PORT:-8686}}"
-PROXY="${wizard_proxy:-}"
-URLS="${wizard_public_urls:-}"
-
-
-# 公共函数：base64 写入环境文件，避免密码里的特殊字符被 shell 解释
-b64() { printf '%s' "$1" | base64 | tr -d '\n'; }
-
-write_env() {
-    local f="$1" user="$2" pass="$3" port="$4" proxy="$5" urls="$6" force="$7"
-    {
-        echo "# 由飞牛安装向导 / 应用设置生成，请勿手工修改"
-        echo "YCFMG_PORT=\"${port}\""
-        echo "YCFMG_ADMIN_USER=\"${user}\""
-        [ -n "${pass}" ] && echo "YCFMG_ADMIN_PASSWORD_B64=\"$(b64 "${pass}")\""
-        [ -n "${proxy}" ] && echo "YCFMG_UPDATE_PROXY_B64=\"$(b64 "${proxy}")\""
-        [ -n "${urls}" ] && echo "YCFMG_PUBLIC_URLS_B64=\"$(b64 "${urls}")\""
-        echo "YCFMG_ADMIN_FORCE=\"${force}\""
-    } > "${f}"
-    chmod 600 "${f}"
-}
+PORT="${TRIM_SERVICE_PORT:-8686}"
 
 mkdir -p "${ETC}" "${VAR}/thumbs" "${TRIM_PKGHOME}" 2>/dev/null
 chmod +x "${BIN}" 2>/dev/null
-
-# 诊断：记录安装向导实际传入的参数，便于排查（不记录密码内容）
-{
-    echo "=== 安装向导参数 $(date '+%Y-%m-%d %H:%M:%S') ==="
-    echo "  wizard_username=${wizard_username:-<未提供>}"
-    echo "  wizard_port=${wizard_port:-<未提供>}"
-    echo "  wizard_proxy=${wizard_proxy:-<未提供>}"
-    echo "  wizard_public_urls=${wizard_public_urls:-<未提供>}"
-    if [ -n "${wizard_password:-}" ]; then
-        echo "  wizard_password=<已提供, ${#wizard_password} 位>"
-    else
-        echo "  wizard_password=<未提供>"
-    fi
-} >> "${LOG}" 2>/dev/null
 
 if [ ! -f "${CFG}" ] && [ -f "${TRIM_APPDEST}/etc/config.example.yaml" ]; then
     cp "${TRIM_APPDEST}/etc/config.example.yaml" "${CFG}"
@@ -56,18 +18,16 @@ fi
 if [ -f "${CFG}" ]; then
     sed -i "0,/^  port:/s|^  port:.*|  port: ${PORT}|" "${CFG}"
     sed -i "s|^data_dir:.*|data_dir: ${VAR}|" "${CFG}"
-    if [ -n "${USER_NAME}" ]; then
-        sed -i "0,/^  username:/s|^  username:.*|  username: ${USER_NAME}|" "${CFG}"
-    fi
-    if [ -n "${PROXY}" ]; then
-        sed -i "/^update:/,\$ s|^  proxy:.*|  proxy: \"${PROXY}\"|" "${CFG}"
-    fi
 fi
 
-# 写入运行环境：密码 base64；FORCE=1 表示下次启动按向导值设置/重置管理员密码
-write_env "${ENVF}" "${USER_NAME}" "${USER_PASS}" "${PORT}" "${PROXY}" "${URLS}" "1"
+# 运行时环境（免登录 + 端口）
+cat > "${ENVF}" <<EOF
+# 由安装流程生成，请勿手工修改
+YCFMG_PORT="${PORT}"
+YCFMG_ADMIN_FORCE="0"
+EOF
+chmod 600 "${ENVF}"
 
-echo "YCFMG 安装完成：账号 ${USER_NAME}，端口 ${PORT}"
-echo "配置：${CFG}"
-echo "运行数据：${VAR}"
+echo "YCFMG 安装完成：端口 ${PORT}，数据目录 ${VAR}"
+echo "免登录模式：浏览器直接打开 http://设备IP:${PORT} 即可使用"
 exit 0

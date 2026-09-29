@@ -1,60 +1,6 @@
 #!/bin/bash
-# 配置变更后回调：更新环境文件并重启服务
+# 配置变更后回调：重启服务
 set -u
-ETC="${TRIM_PKGETC}"
-CFG="${ETC}/config.yaml"
-ENVF="${ETC}/app.env"
-
-PORT="${wizard_port:-${TRIM_SERVICE_PORT:-8686}}"
-USER_NAME="${wizard_username:-}"
-USER_PASS="${wizard_password:-}"
-PROXY="${wizard_proxy:-}"
-URLS="${wizard_public_urls:-}"
-
-
-# 公共函数：base64 写入环境文件，避免密码里的特殊字符被 shell 解释
-b64() { printf '%s' "$1" | base64 | tr -d '\n'; }
-
-write_env() {
-    local f="$1" user="$2" pass="$3" port="$4" proxy="$5" urls="$6" force="$7"
-    {
-        echo "# 由飞牛安装向导 / 应用设置生成，请勿手工修改"
-        echo "YCFMG_PORT=\"${port}\""
-        echo "YCFMG_ADMIN_USER=\"${user}\""
-        [ -n "${pass}" ] && echo "YCFMG_ADMIN_PASSWORD_B64=\"$(b64 "${pass}")\""
-        [ -n "${proxy}" ] && echo "YCFMG_UPDATE_PROXY_B64=\"$(b64 "${proxy}")\""
-        [ -n "${urls}" ] && echo "YCFMG_PUBLIC_URLS_B64=\"$(b64 "${urls}")\""
-        echo "YCFMG_ADMIN_FORCE=\"${force}\""
-    } > "${f}"
-    chmod 600 "${f}"
-}
-
-# 读取现有值，未填写的项保持原样
-OLD_USER="admin"; OLD_PROXY=""; OLD_URLS=""
-if [ -f "${ENVF}" ]; then
-    set -a; . "${ENVF}"; set +a
-    [ -n "${YCFMG_ADMIN_USER:-}" ] && OLD_USER="${YCFMG_ADMIN_USER}"
-    [ -n "${YCFMG_UPDATE_PROXY_B64:-}" ] && OLD_PROXY="$(printf '%s' "${YCFMG_UPDATE_PROXY_B64}" | base64 -d 2>/dev/null)"
-    [ -n "${YCFMG_PUBLIC_URLS_B64:-}" ] && OLD_URLS="$(printf '%s' "${YCFMG_PUBLIC_URLS_B64}" | base64 -d 2>/dev/null)"
-fi
-
-USER_NAME="${USER_NAME:-${OLD_USER}}"
-PROXY="${PROXY:-${OLD_PROXY}}"
-URLS="${URLS:-${OLD_URLS}}"
-
-if [ -f "${CFG}" ]; then
-    sed -i "0,/^  port:/s|^  port:.*|  port: ${PORT}|" "${CFG}"
-    sed -i "0,/^  username:/s|^  username:.*|  username: ${USER_NAME}|" "${CFG}"
-    if [ -n "${PROXY}" ]; then
-        sed -i "/^update:/,\$ s|^  proxy:.*|  proxy: \"${PROXY}\"|" "${CFG}"
-    fi
-    if [ -n "${URLS}" ]; then
-        sed -i "/^update:/,\$ s|^  download_page:.*|  download_page: ${URLS%%,*}|" "${CFG}" 2>/dev/null || true
-    fi
-fi
-
-write_env "${ENVF}" "${USER_NAME}" "${USER_PASS}" "${PORT}" "${PROXY}" "${URLS}" "1"
-
 bash "${TRIM_APPDEST}/../cmd/main" stop >/dev/null 2>&1 || true
 bash "${TRIM_APPDEST}/../cmd/main" start >/dev/null 2>&1 || true
 exit 0

@@ -43,18 +43,24 @@ code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding
 .changelog h3{margin:0 0 8px;font-size:15px}
 .changelog ul{margin:0 0 16px;padding-left:18px;color:var(--muted);font-size:13px}
 footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);font-size:12.5px;text-align:center}
-/* 预览图灯箱 */
+/* 预览图灯箱（含缩放） */
 .shot img{cursor:zoom-in}
-.lb{position:fixed;inset:0;background:rgba(0,0,0,.93);display:none;align-items:center;justify-content:center;z-index:100}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.93);display:none;align-items:center;justify-content:center;z-index:100;overflow:hidden}
 .lb.on{display:flex}
-.lb img{max-width:94vw;max-height:84vh;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.lb img{max-width:94vw;max-height:84vh;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.6);user-select:none;-webkit-user-drag:none;transform-origin:center center;will-change:transform}
+.lb img.grab{cursor:grab}
+.lb img.grabbing{cursor:grabbing}
 .lb .nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:64px;border:0;border-radius:8px;background:rgba(255,255,255,.12);color:#fff;font-size:26px;line-height:1;cursor:pointer}
 .lb .nav:hover{background:rgba(255,255,255,.22)}
 .lb .prev{left:18px}.lb .next{right:18px}
 .lb .close{position:absolute;top:16px;right:18px;width:40px;height:40px;border:0;border-radius:8px;background:rgba(255,255,255,.12);color:#fff;font-size:20px;cursor:pointer}
 .lb .close:hover{background:rgba(255,255,255,.22)}
-.lb .cap{position:absolute;left:0;right:0;bottom:22px;text-align:center;color:#ddd;font-size:13px}
+.lb .tools{position:absolute;right:18px;bottom:22px;display:flex;gap:6px}
+.lb .tools button{min-width:38px;height:34px;border:0;border-radius:8px;background:rgba(255,255,255,.12);color:#fff;font-size:14px;cursor:pointer}
+.lb .tools button:hover{background:rgba(255,255,255,.22)}
+.lb .cap{position:absolute;left:0;right:0;bottom:26px;text-align:center;color:#ddd;font-size:13px;pointer-events:none}
 .lb .idx{position:absolute;top:20px;left:20px;color:#ddd;font-size:13px}
+.lb .hint{position:absolute;top:20px;left:50%;transform:translateX(-50%);color:#9aa;font-size:12px}
 </style>
 </head>
 <body>
@@ -69,7 +75,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
     </div>
     <p class="tagline">用文件管理器的自由度，配图库的检索体验。真实目录零搬迁，以图搜图、以文搜图、自动分类标签，专属分享页与多域名绑定。</p>
     <div class="badges">
-      <span class="badge">版本 fmg2609.006</span>
+      <span class="badge">版本 fmg2609.008</span>
       <span class="badge">飞牛 fnOS 专用</span>
       <span class="badge">安装即用，无需登录</span>
     </div>
@@ -83,7 +89,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
       <h3>YCFMG 飞牛应用包</h3>
       <p>在飞牛 NAS 的「应用中心 → 手动安装」中选择该文件，安装向导里填好账号密码即可。</p>
     </div>
-    <a class="btn" href="files/YCFMG_fmg2609.006.fpk" download>下载 fpk（{{SIZE_FPK}}）</a>
+    <a class="btn" href="files/YCFMG_fmg2609.008.fpk" download>下载 fpk（{{SIZE_FPK}}）</a>
   </div>
   <ol>
     <li>下载上方的 <code>.fpk</code> 文件；</li>
@@ -140,7 +146,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
 
   <h2>更新记录</h2>
   <div class="card changelog">
-    <h3>fmg2609.006</h3>
+    <h3>fmg2609.008</h3>
     <ul>
       <li>下载页预览图支持点击放大查看（灯箱，可左右切换、Esc 关闭）</li>
     </ul>
@@ -166,14 +172,20 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
 </main>
 
 <footer>
-  <div class="wrap">YCFMG fmg2609.006 · MIT License · 构建时间 {{BUILD_TIME}}</div>
+  <div class="wrap">YCFMG fmg2609.008 · MIT License · 构建时间 {{BUILD_TIME}}</div>
 </footer>
 <div class="lb" id="lb">
   <span class="idx" id="lbIdx"></span>
+  <span class="hint">滚轮缩放 · 双击放大 · 放大后可拖动</span>
   <button class="close" id="lbClose" aria-label="关闭">&#10005;</button>
   <button class="nav prev" id="lbPrev" aria-label="上一张">&#8249;</button>
   <img id="lbImg" src="" alt="">
   <button class="nav next" id="lbNext" aria-label="下一张">&#8250;</button>
+  <div class="tools">
+    <button id="lbOut" title="缩小">&#8722;</button>
+    <button id="lbReset" title="原始大小">1:1</button>
+    <button id="lbIn" title="放大">&#43;</button>
+  </div>
   <div class="cap" id="lbCap"></div>
 </div>
 <script>
@@ -184,7 +196,25 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
   var big = document.getElementById("lbImg");
   var cap = document.getElementById("lbCap");
   var idx = document.getElementById("lbIdx");
-  var cur = 0;
+  var cur = 0, scale = 1, tx = 0, ty = 0, drag = false, px = 0, py = 0;
+
+  function apply() {
+    big.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + scale + ")";
+    big.classList.toggle("grab", scale > 1);
+  }
+  function resetZoom() { scale = 1; tx = 0; ty = 0; apply(); }
+  function zoomAt(f, cx, cy) {
+    var ns = Math.min(8, Math.max(0.4, scale * f));
+    if (ns === scale) { return; }
+    var r = big.getBoundingClientRect();
+    var ox = (cx === undefined ? r.left + r.width / 2 : cx) - (r.left + r.width / 2);
+    var oy = (cy === undefined ? r.top + r.height / 2 : cy) - (r.top + r.height / 2);
+    tx -= ox * (ns / scale - 1);
+    ty -= oy * (ns / scale - 1);
+    scale = ns;
+    if (scale <= 1) { tx = 0; ty = 0; }
+    apply();
+  }
   function caps(i) {
     var fig = imgs[i].closest(".shot");
     var c = fig ? fig.querySelector(".cap") : null;
@@ -196,19 +226,57 @@ footer{border-top:1px solid var(--line);padding:24px 0 44px;color:var(--muted);f
     big.alt = imgs[cur].getAttribute("alt") || "";
     cap.textContent = caps(cur);
     idx.textContent = (cur + 1) + " / " + imgs.length;
+    resetZoom();
     box.classList.add("on");
   }
-  function hide() { box.classList.remove("on"); big.src = ""; }
+  function hide() { box.classList.remove("on"); big.src = ""; resetZoom(); }
+
   imgs.forEach(function (im, i) { im.addEventListener("click", function () { show(i); }); });
   document.getElementById("lbClose").onclick = hide;
   document.getElementById("lbPrev").onclick = function (e) { e.stopPropagation(); show(cur - 1); };
   document.getElementById("lbNext").onclick = function (e) { e.stopPropagation(); show(cur + 1); };
+  document.getElementById("lbIn").onclick = function (e) { e.stopPropagation(); zoomAt(1.25); };
+  document.getElementById("lbOut").onclick = function (e) { e.stopPropagation(); zoomAt(0.8); };
+  document.getElementById("lbReset").onclick = function (e) { e.stopPropagation(); resetZoom(); };
+
+  big.addEventListener("dblclick", function (e) {
+    e.stopPropagation();
+    if (scale > 1) { resetZoom(); } else { zoomAt(2.5, e.clientX, e.clientY); }
+  });
+  big.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    zoomAt(e.deltaY < 0 ? 1.15 : 0.87, e.clientX, e.clientY);
+  }, { passive: false });
+  big.addEventListener("mousedown", function (e) {
+    if (scale <= 1) { return; }
+    e.preventDefault();
+    drag = true; px = e.clientX; py = e.clientY;
+    big.classList.add("grabbing");
+  });
+  document.addEventListener("mousemove", function (e) {
+    if (!drag) { return; }
+    tx += e.clientX - px; ty += e.clientY - py;
+    px = e.clientX; py = e.clientY;
+    apply();
+  });
+  document.addEventListener("mouseup", function () {
+    if (!drag) { return; }
+    drag = false; big.classList.remove("grabbing");
+  });
   box.addEventListener("click", function (e) { if (e.target === box) { hide(); } });
+  box.addEventListener("wheel", function (e) {
+    if (e.target === big) { return; }
+    e.preventDefault();
+    zoomAt(e.deltaY < 0 ? 1.15 : 0.87);
+  }, { passive: false });
   document.addEventListener("keydown", function (e) {
     if (!box.classList.contains("on")) { return; }
     if (e.key === "Escape") { hide(); }
     if (e.key === "ArrowLeft") { show(cur - 1); }
     if (e.key === "ArrowRight") { show(cur + 1); }
+    if (e.key === "+" || e.key === "=") { zoomAt(1.25); }
+    if (e.key === "-") { zoomAt(0.8); }
+    if (e.key === "0") { resetZoom(); }
   });
 })();
 </script>
