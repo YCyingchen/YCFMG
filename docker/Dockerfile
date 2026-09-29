@@ -1,12 +1,16 @@
-# syntax=docker/dockerfile:1
-FROM golang:1.27-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS builder
+# 说明：builder 阶段固定跑在构建机原生架构，用 GOARCH=$TARGETARCH 交叉编译，
+# 因此多架构构建无需 qemu 模拟，速度快且产物一致。
+ARG TARGETARCH
+ARG TARGETOS=linux
+ARG VERSION=fmg2609.001
+ARG COMMIT=dev
+ENV CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go env -w GOPROXY=https://goproxy.cn,direct && go mod download
 COPY . .
-ARG VERSION=fmg2609.001
-ARG COMMIT=dev
-RUN CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X github.com/ycyingchen/ycfmg/internal/version.Version=${VERSION} -X github.com/ycyingchen/ycfmg/internal/version.Commit=${COMMIT}" -o /out/ycfmg ./cmd/ycfmg
+RUN go build -trimpath -buildvcs=false -ldflags "-s -w -X github.com/ycyingchen/ycfmg/internal/version.Version=$VERSION -X github.com/ycyingchen/ycfmg/internal/version.Commit=$COMMIT" -o /out/ycfmg ./cmd/ycfmg
 
 FROM alpine:3.20
 RUN apk add --no-cache tzdata ca-certificates ffmpeg su-exec && rm -rf /var/cache/apk/*

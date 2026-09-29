@@ -1,0 +1,13 @@
+{
+  "data-share": {
+    "shares": [
+      { "name": "ycfmg/library" },
+      { "name": "ycfmg/shares" }
+    ]
+  },
+  "usr-local-linker": {
+    "bin": [
+      "bin/ycfmg"
+    ]
+  }
+}

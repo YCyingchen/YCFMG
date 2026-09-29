@@ -8,13 +8,25 @@ VERSION="${VERSION:-$(cat "$ROOT/VERSION" | tr -d "[:space:]")}"
 USER="${DOCKER_USER:-ycyingchen}"
 IMAGE="${DOCKER_IMAGE:-ycfmg}"
 PLATFORMS="${DOCKER_PLATFORMS:-linux/amd64,linux/arm64}"
+PROXY="${DOCKER_BUILD_PROXY:-}"
 
 if [ -n "${DOCKER_PASS:-}" ]; then
   echo "$DOCKER_PASS" | docker login -u "$USER" --password-stdin
 fi
 
 cd "$ROOT"
-docker buildx inspect ycfmg-builder >/dev/null 2>&1 || docker buildx create --name ycfmg-builder --use
+if ! docker buildx inspect ycfmg-builder >/dev/null 2>&1; then
+  if [ -n "$PROXY" ]; then
+    docker buildx create --name ycfmg-builder --driver docker-container \
+      --driver-opt "network=host" \
+      --driver-opt "env.HTTP_PROXY=$PROXY" \
+      --driver-opt "env.HTTPS_PROXY=$PROXY" \
+      --driver-opt "env.http_proxy=$PROXY" \
+      --driver-opt "env.https_proxy=$PROXY" >/dev/null
+  else
+    docker buildx create --name ycfmg-builder --driver docker-container >/dev/null
+  fi
+fi
 docker buildx use ycfmg-builder
 
 echo "== 构建并推送 $USER/$IMAGE:$VERSION =="

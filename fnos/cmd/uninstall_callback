@@ -1,7 +1,4 @@
 #!/bin/bash
-# 卸载前回调：停止服务（数据目录保留，由用户决定是否删除）
+# 卸载后：清理进程残留（用户数据保留，由系统按策略处理）
 set -u
-APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-"$APP_DIR/cmd/main" stop
-echo "YCFMG 已停止，数据目录 $APP_DIR/data 已保留。"
 exit 0

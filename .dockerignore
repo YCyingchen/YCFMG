@@ -1,0 +1,13 @@
+.tools/
+.testdata/
+dist/
+build/
+.git/
+.gitignore
+docs/screenshots/
+node_modules/
+*.fpk
+*.tar.gz
+*.db
+*.db-wal
+*.db-shm

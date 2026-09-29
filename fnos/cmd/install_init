@@ -1,0 +1,4 @@
+#!/bin/bash
+# 安装前：检查环境
+set -u
+exit 0

@@ -1,5 +1,6 @@
 #!/bin/bash
-# 配置读取回调：返回应用当前监听端口
+# 配置变更后：重启服务以应用新配置
 set -u
-echo "${YCFMG_PORT:-8686}"
+bash "${TRIM_APPDEST}/../cmd/main" stop >/dev/null 2>&1 || true
+bash "${TRIM_APPDEST}/../cmd/main" start >/dev/null 2>&1 || true
 exit 0

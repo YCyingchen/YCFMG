@@ -1,8 +1,8 @@
 #!/bin/bash
-# 升级后回调：保留数据与配置，仅重启服务
+# 升级后：保留数据与配置，重启服务
 set -u
-APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-chmod +x "$APP_DIR/bin/ycfmg" 2>/dev/null || true
-"$APP_DIR/cmd/main" restart
-echo "YCFMG 升级完成。"
+chmod +x "${TRIM_APPDEST}/bin/ycfmg" 2>/dev/null
+bash "${TRIM_APPDEST}/../cmd/main" stop >/dev/null 2>&1 || true
+bash "${TRIM_APPDEST}/../cmd/main" start >/dev/null 2>&1 || true
+echo "YCFMG 升级完成"
 exit 0

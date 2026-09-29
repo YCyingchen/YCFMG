@@ -1,0 +1,6 @@
+#!/bin/bash
+# 卸载前：停止服务，保留用户数据
+set -u
+bash "${TRIM_APPDEST}/../cmd/main" stop >/dev/null 2>&1 || true
+echo "YCFMG 已停止；数据目录 ${TRIM_PKGVAR} 默认保留"
+exit 0

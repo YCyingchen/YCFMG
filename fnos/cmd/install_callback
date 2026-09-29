@@ -1,11 +1,33 @@
 #!/bin/bash
-# 安装后回调：初始化数据目录与默认配置
+# 安装后：初始化配置目录、数据目录与默认配置
 set -u
-APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-mkdir -p "$APP_DIR/data" "$APP_DIR/etc" "$APP_DIR/data/thumbs"
-if [ ! -f "$APP_DIR/etc/config.yaml" ] && [ -f "$APP_DIR/etc/config.example.yaml" ]; then
-  cp "$APP_DIR/etc/config.example.yaml" "$APP_DIR/etc/config.yaml"
+BIN="${TRIM_APPDEST}/bin/ycfmg"
+ETC="${TRIM_PKGETC}"
+VAR="${TRIM_PKGVAR}"
+PORT="${TRIM_SERVICE_PORT:-8686}"
+
+mkdir -p "${ETC}" "${VAR}/thumbs" "${TRIM_PKGHOME}" 2>/dev/null
+chmod +x "${BIN}" 2>/dev/null
+
+if [ ! -f "${ETC}/config.yaml" ] && [ -f "${TRIM_APPDEST}/etc/config.example.yaml" ]; then
+    cp "${TRIM_APPDEST}/etc/config.example.yaml" "${ETC}/config.yaml"
+    sed -i "s|^  port:.*|  port: ${PORT}|" "${ETC}/config.yaml"
+    sed -i "s|^data_dir:.*|data_dir: ${VAR}|" "${ETC}/config.yaml"
 fi
-chmod +x "$APP_DIR/bin/ycfmg" 2>/dev/null || true
-echo "YCFMG 安装完成，首次启动后请查看日志中的初始密码。"
+
+# 把声明过的共享目录加入默认文件库（保持幂等：仅在未配置时写入）
+SHARES="${TRIM_DATA_SHARE_PATHS:-}"
+if [ -n "${SHARES}" ] && [ -f "${ETC}/config.yaml" ]; then
+    if ! grep -q "library" "${ETC}/config.yaml" 2>/dev/null; then
+        {
+            echo "libraries:"
+            echo "  - name: 共享图库"
+            echo "    path: ${SHARES%%:*}"
+            echo "    readonly: false"
+            echo "    index: true"
+        } >> "${ETC}/config.yaml"
+    fi
+fi
+
+echo "YCFMG 安装完成：配置文件 ${ETC}/config.yaml，数据目录 ${VAR}"
 exit 0
