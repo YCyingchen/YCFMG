@@ -292,8 +292,15 @@ func (s *Server) staticHandler() http.Handler {
 			}
 			r.URL.Path = "/"
 		}
-		if strings.HasPrefix(p, "assets/") || strings.HasSuffix(p, ".css") || strings.HasSuffix(p, ".js") || strings.HasSuffix(p, ".svg") || strings.HasSuffix(p, ".png") {
-			w.Header().Set("Cache-Control", "public, max-age=86400")
+		// 页面与脚本一律不缓存：应用升级后浏览器必须立刻拿到新资源，
+		// 否则旧 JS 配新 HTML 会直接白屏。图片等静态资源可以长缓存。
+		switch {
+		case strings.HasSuffix(p, ".html") || strings.HasSuffix(p, ".js") || strings.HasSuffix(p, ".css") || strings.HasSuffix(p, ".json"):
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			w.Header().Set("Pragma", "no-cache")
+			w.Header().Set("Expires", "0")
+		case strings.HasSuffix(p, ".svg") || strings.HasSuffix(p, ".png") || strings.HasSuffix(p, ".jpg") || strings.HasSuffix(p, ".ico"):
+			w.Header().Set("Cache-Control", "public, max-age=604800")
 		}
 		fileServer.ServeHTTP(w, r)
 	})
