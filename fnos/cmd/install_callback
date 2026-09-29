@@ -6,6 +6,7 @@ ETC="${TRIM_PKGETC}"
 VAR="${TRIM_PKGVAR}"
 CFG="${ETC}/config.yaml"
 ENVF="${ETC}/app.env"
+LOG="${VAR}/info.log"
 
 USER_NAME="${wizard_username:-admin}"
 USER_PASS="${wizard_password:-}"
@@ -34,6 +35,20 @@ write_env() {
 mkdir -p "${ETC}" "${VAR}/thumbs" "${TRIM_PKGHOME}" 2>/dev/null
 chmod +x "${BIN}" 2>/dev/null
 
+# 诊断：记录安装向导实际传入的参数，便于排查（不记录密码内容）
+{
+    echo "=== 安装向导参数 $(date '+%Y-%m-%d %H:%M:%S') ==="
+    echo "  wizard_username=${wizard_username:-<未提供>}"
+    echo "  wizard_port=${wizard_port:-<未提供>}"
+    echo "  wizard_proxy=${wizard_proxy:-<未提供>}"
+    echo "  wizard_public_urls=${wizard_public_urls:-<未提供>}"
+    if [ -n "${wizard_password:-}" ]; then
+        echo "  wizard_password=<已提供, ${#wizard_password} 位>"
+    else
+        echo "  wizard_password=<未提供>"
+    fi
+} >> "${LOG}" 2>/dev/null
+
 if [ ! -f "${CFG}" ] && [ -f "${TRIM_APPDEST}/etc/config.example.yaml" ]; then
     cp "${TRIM_APPDEST}/etc/config.example.yaml" "${CFG}"
 fi
@@ -49,7 +64,7 @@ if [ -f "${CFG}" ]; then
     fi
 fi
 
-# 写入运行环境（密码 base64；FORCE=1 表示启动时按向导值设置/重置管理员密码）
+# 写入运行环境：密码 base64；FORCE=1 表示下次启动按向导值设置/重置管理员密码
 write_env "${ENVF}" "${USER_NAME}" "${USER_PASS}" "${PORT}" "${PROXY}" "${URLS}" "1"
 
 echo "YCFMG 安装完成：账号 ${USER_NAME}，端口 ${PORT}"

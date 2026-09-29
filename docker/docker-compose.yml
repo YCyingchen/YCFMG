@@ -2,7 +2,7 @@
 # 用法：docker compose up -d
 services:
   ycfmg:
-    image: ycyingchen/ycfmg:fmg2609.003   # 镜像，支持 amd64 / arm64
+    image: ycyingchen/ycfmg:fmg2609.004   # 镜像，支持 amd64 / arm64
     container_name: ycfmg                 # 容器名
     restart: unless-stopped               # 开机自启
     ports:

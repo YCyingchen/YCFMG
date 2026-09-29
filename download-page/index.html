@@ -61,7 +61,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
     </div>
     <p class="tagline">用文件管理器的自由度，配图库的检索体验。<br>真实目录零搬迁，以图搜图、以文搜图、自动分类标签，专属分享页与多域名绑定。</p>
     <div class="badges">
-      <span class="badge">版本 fmg2609.003</span>
+      <span class="badge">版本 fmg2609.004</span>
       <span class="badge">飞牛 fnOS / 通用 NAS / VPS</span>
       <span class="badge">fpk · 二进制 · Docker</span>
       <span class="badge">MIT 开源</span>
@@ -76,7 +76,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
       <h3>飞牛 fnOS 应用包（fpk）</h3>
       <p>在飞牛 NAS 的「应用中心 → 手动安装」中选择该文件即可完成安装与开机自启。</p>
       <div class="actions">
-        <a class="btn" href="files/YCFMG_fmg2609.003.fpk" download>下载 fpk（{{SIZE_FPK}}）</a>
+        <a class="btn" href="files/YCFMG_fmg2609.004.fpk" download>下载 fpk（{{SIZE_FPK}}）</a>
         <a class="btn ghost" href="#install-fnos">安装说明</a>
       </div>
     </div>
@@ -110,8 +110,8 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
   <table>
     <thead><tr><th>平台</th><th>架构</th><th>文件</th><th>大小</th></tr></thead>
     <tbody>
-      <tr><td>Linux</td><td>x86_64</td><td><a href="files/ycfmg-fmg2609.003-linux-amd64.tar.gz" download>ycfmg-fmg2609.003-linux-amd64.tar.gz</a></td><td>{{SIZE_LINUX_AMD64_TGZ}}</td></tr>
-      <tr><td>Linux</td><td>arm64</td><td><a href="files/ycfmg-fmg2609.003-linux-arm64.tar.gz" download>ycfmg-fmg2609.003-linux-arm64.tar.gz</a></td><td>{{SIZE_LINUX_ARM64_TGZ}}</td></tr>
+      <tr><td>Linux</td><td>x86_64</td><td><a href="files/ycfmg-fmg2609.004-linux-amd64.tar.gz" download>ycfmg-fmg2609.004-linux-amd64.tar.gz</a></td><td>{{SIZE_LINUX_AMD64_TGZ}}</td></tr>
+      <tr><td>Linux</td><td>arm64</td><td><a href="files/ycfmg-fmg2609.004-linux-arm64.tar.gz" download>ycfmg-fmg2609.004-linux-arm64.tar.gz</a></td><td>{{SIZE_LINUX_ARM64_TGZ}}</td></tr>
       <tr><td>Linux（裸二进制）</td><td>x86_64</td><td><a href="files/ycfmg-linux-amd64" download>ycfmg-linux-amd64</a></td><td>{{SIZE_LINUX_AMD64}}</td></tr>
       <tr><td>Linux（裸二进制）</td><td>arm64</td><td><a href="files/ycfmg-linux-arm64" download>ycfmg-linux-arm64</a></td><td>{{SIZE_LINUX_ARM64}}</td></tr>
       <tr><td>Windows</td><td>x86_64</td><td><a href="files/ycfmg-windows-amd64.exe" download>ycfmg-windows-amd64.exe</a></td><td>{{SIZE_WIN}}</td></tr>
@@ -123,7 +123,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
   <h2 id="install-fnos">飞牛 fnOS 安装</h2>
   <div class="note">该应用包符合飞牛开发者规范（manifest / cmd 生命周期脚本 / config 权限与资源声明 / wizard），安装后由应用中心统一管理启停与升级。</div>
   <ol>
-    <li>下载 <code>YCFMG_fmg2609.003.fpk</code>；</li>
+    <li>下载 <code>YCFMG_fmg2609.004.fpk</code>；</li>
     <li>打开飞牛 NAS →「应用中心」→「手动安装」，选择该 fpk 文件；</li>
     <li>安装完成后在应用中心启动，浏览器访问 <code>http://设备IP:8686</code>；</li>
     <li>首次登录使用 <code>admin</code>，初始密码在应用日志（应用中心 → 日志，或 <code>应用数据目录/info.log</code>）中查看，并请立即修改。</li>
@@ -135,7 +135,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
   <p>新建一个目录，放入下面的 <code>docker-compose.yml</code>，执行 <code>docker compose up -d</code> 即可。</p>
 <pre><code>services:
   ycfmg:
-    image: ycyingchen/ycfmg:fmg2609.003   # 镜像，支持 amd64 / arm64
+    image: ycyingchen/ycfmg:fmg2609.004   # 镜像，支持 amd64 / arm64
     container_name: ycfmg                 # 容器名
     restart: unless-stopped               # 开机自启
     ports:
@@ -151,28 +151,26 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
   <p>常用命令：<code>docker compose up -d</code> 启动，<code>docker compose logs -f</code> 看日志，<code>docker compose down</code> 停止。</p>
 
   
-      <h2 id="changelog">更新记录</h2>
+        <h2 id="changelog">更新记录</h2>
   <div class="card">
-    <h3>fmg2609.003 <span class="badge">最新</span></h3>
+    <h3>fmg2609.004 <span class="badge">最新</span></h3>
     <ul class="feat">
-      <li>修复安装向导填写的账号密码不生效、无法登录的问题</li>
-      <li>密码 / 域名 / 代理改用 base64 传递，含特殊字符也能正常登录</li>
-      <li>应用设置中修改密码立即生效，且不会覆盖之后在应用内改的密码</li>
+      <li>安装向导填写的参数会写入安装日志，便于定位登录问题</li>
+      <li>修正改用户名场景：库里已有账号时创建新管理员，不再静默失败</li>
+      <li>修正一次性重置标记，不再覆盖你在应用内改的密码</li>
     </ul>
   </div>
   <div class="card">
-    <h3>fmg2609.002</h3>
+    <h3>fmg2609.003</h3>
     <ul class="feat">
-      <li>fpk 新增安装向导：填写管理员账号、密码、服务端口、更新代理与托管域名</li>
-      <li>fpk 新增桌面入口，可在应用中心点击图标在桌面窗口内打开</li>
-      <li>新增 scripts/bump-version.sh：每次修改自动同步版本号</li>
+      <li>修复向导密码不生效：启动环境变量未导出 + 特殊字符转义</li>
+      <li>密码 / 域名 / 代理改用 base64 传递</li>
     </ul>
   </div>
   <div class="card">
-    <h3>fmg2609.001</h3>
+    <h3>fmg2609.001 - 002</h3>
     <ul class="feat">
-      <li>首个版本：文件管理 + 智能图库、以图搜图、以文搜图、自动分类标签</li>
-      <li>专属分享页与多域名绑定、fpk 打包、多架构 Docker 镜像、静态下载站</li>
+      <li>首个版本与安装向导、桌面入口、多架构镜像、在线更新、下载站</li>
     </ul>
   </div>
 <h2 id="updater">应用内在线更新</h2>
@@ -228,7 +226,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 46px;color:var(--muted);f
 
 <footer>
   <div class="wrap foot">
-    <div>YCFMG fmg2609.003 · MIT License · 构建时间 {{BUILD_TIME}}</div>
+    <div>YCFMG fmg2609.004 · MIT License · 构建时间 {{BUILD_TIME}}</div>
     <div><a href="https://github.com/YCyingchen/YCFMG" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/YCyingchen/YCFMG/blob/main/docs/部署指南.md" target="_blank" rel="noopener">部署指南</a></div>
   </div>
 </footer>

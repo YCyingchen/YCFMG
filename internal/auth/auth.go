@@ -41,8 +41,12 @@ func (m *Manager) EnsureAdmin() (string, error) {
 		if os.Getenv("YCFMG_ADMIN_FORCE") == "1" && strings.TrimSpace(m.cfg.Auth.Password) != "" {
 			hash, herr := bcrypt.GenerateFromPassword([]byte(m.cfg.Auth.Password), bcrypt.DefaultCost)
 			if herr == nil {
-				if uerr := m.st.UpdateUserPassword(username, string(hash)); uerr == nil {
-					logx.Infof("已按安装向导或应用设置重置管理员 %s 的密码", username)
+				if _, gerr := m.st.GetUser(username); gerr == nil {
+					if uerr := m.st.UpdateUserPassword(username, string(hash)); uerr == nil {
+						logx.Infof("已按安装向导或应用设置重置管理员 %s 的密码", username)
+					}
+				} else if cerr := m.st.CreateUser(&store.User{Username: username, PasswordHash: string(hash), Role: "admin"}); cerr == nil {
+					logx.Infof("已按安装向导创建管理员 %s", username)
 				}
 			}
 		}

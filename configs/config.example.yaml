@@ -4,9 +4,8 @@ server:
   port: 8686
   base_path: ""
   trust_proxy: true
-  public_urls:
-    - http://192.168.1.8:8686
-    - https://fm.example.com
+# 多域名绑定：访问者用哪个域名进来，分享链接就用哪个域名生成；留空则使用当前访问地址
+  public_urls: []
 data_dir: /opt/ycfmg/data
 libraries:
   - name: 照片

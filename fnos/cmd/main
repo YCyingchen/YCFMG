@@ -64,7 +64,7 @@ start_process() {
         log_msg "启动成功 pid=$(cat "${PID_FILE}")"
         # 一次性标记：安装向导/设置页提交的密码只需重置一次，避免覆盖用户在应用内改的密码
         if [ -f "${ENVF}" ]; then
-            sed -i "s|^YCFMG_ADMIN_FORCE=1|YCFMG_ADMIN_FORCE=0|" "${ENVF}" 2>/dev/null
+            sed -i "s|^YCFMG_ADMIN_FORCE=.*|YCFMG_ADMIN_FORCE=0|" "${ENVF}" 2>/dev/null
         fi
         return 0
     fi
