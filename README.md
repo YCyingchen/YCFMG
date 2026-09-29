@@ -162,3 +162,20 @@ YCFMG/
 ## 许可
 
 MIT © 2026 ycyingchen
+
+## 交付状态（fmg2609.001）
+
+| 交付物 | 位置 / 状态 |
+| --- | --- |
+| 源码仓库 | https://github.com/YCyingchen/YCFMG（main 分支，含 vfmg2609.001 标签） |
+| Docker 镜像 | docker pull ycyingchen/ycfmg:fmg2609.001（linux/amd64，149 MB） |
+| fpk 安装包 | dist/YCFMG_fmg2609.001.fpk（5.4 MB，含 manifest、图标与生命周期脚本） |
+| 静态二进制 | dist/ycfmg-linux-amd64 / arm64、darwin-amd64 / arm64、windows-amd64.exe |
+| 已部署实例 | 飞牛 NAS 192.168.1.8:8686（systemd 服务 ycfmg，开机自启） |
+| 验收截图 | docs/screenshots/ 共 9 张 |
+
+> arm64 镜像请在支持 qemu 的机器上执行 `bash scripts/push-docker.sh` 生成多架构 manifest。
+
+### 已部署实例的初始账号
+
+浏览器打开 http://192.168.1.8:8686 ，使用 `admin` / `mPhIzFbjBUzZ` 登录，并请立即在「设置 → 账号安全」中修改密码。
