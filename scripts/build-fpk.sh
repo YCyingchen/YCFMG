@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # YCFMG fpk 打包：生成可被飞牛 NAS(fnOS) 应用中心安装的安装包
 set -euo pipefail
+umask 022
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION="${VERSION:-$(cat "$ROOT/VERSION" | tr -d "[:space:]")}"
 DIST="$ROOT/dist"

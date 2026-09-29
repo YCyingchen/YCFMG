@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # YCFMG 多平台构建：产出静态二进制与发行包
 set -euo pipefail
+umask 022
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION="${VERSION:-$(cat "$ROOT/VERSION" | tr -d "[:space:]")}"
 COMMIT="${COMMIT:-$(cd "$ROOT" && git rev-parse --short HEAD 2>/dev/null || echo dev)}"
