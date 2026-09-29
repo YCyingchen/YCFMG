@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
 	"syscall"
 	"time"
 
@@ -29,14 +30,16 @@ import (
 
 func main() {
 	var (
-		configPath string
-		portFlag   int
-		dataFlag   string
-		showVer    bool
-		scanNow    bool
+		configPath    string
+		portFlag      int
+		sharePortFlag int
+		dataFlag      string
+		showVer       bool
+		scanNow       bool
 	)
 	flag.StringVar(&configPath, "config", "config.yaml", "配置文件路径")
 	flag.IntVar(&portFlag, "port", 0, "监听端口（覆盖配置文件）")
+	flag.IntVar(&sharePortFlag, "share-port", 0, "分享专用端口（0 表示与主端口共用）")
 	flag.StringVar(&dataFlag, "data", "", "数据目录（覆盖配置文件）")
 	flag.BoolVar(&showVer, "version", false, "打印版本号后退出")
 	flag.BoolVar(&scanNow, "scan", false, "启动后立即执行一次全量索引")
@@ -54,6 +57,9 @@ func main() {
 	}
 	if portFlag > 0 {
 		cfg.Server.Port = portFlag
+	}
+	if sharePortFlag > 0 {
+		cfg.Server.SharePort = sharePortFlag
 	}
 	if dataFlag != "" {
 		cfg.DataDir = dataFlag
@@ -114,6 +120,40 @@ func main() {
 		logx.Infof("已绑定域名: %v", cfg.Server.PublicURLs)
 	}
 	logx.Infof("访问地址: http://%s:%d%s", displayHost(cfg.Server.Host), cfg.Server.Port, cfg.Server.BasePath)
+	// 分享专用端口：只放行分享页面与前端静态资源，其余一律 404，
+	// 这样对外只需暴露分享端口，文件管理器本身不必暴露。
+	if cfg.Server.SharePort > 0 && cfg.Server.SharePort != cfg.Server.Port {
+		shareAddr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.SharePort)
+		inner := srv.Handler()
+		shareSrv := &http.Server{
+			Addr: shareAddr,
+			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				p := r.URL.Path
+				if strings.HasPrefix(p, "/s/") || strings.HasPrefix(p, "/css/") ||
+					strings.HasPrefix(p, "/js/") || strings.HasPrefix(p, "/img/") ||
+					p == "/favicon.ico" || p == "/favicon.svg" || p == "/api/public" {
+					inner.ServeHTTP(w, r)
+					return
+				}
+				if p == "/" {
+					w.Header().Set("Content-Type", "text/html; charset=utf-8")
+					fmt.Fprint(w, "<!doctype html><meta charset=\"utf-8\"><title>YCFMG 分享</title>"+
+						"<body style=\"font-family:system-ui;padding:40px;color:#333\"><h2>YCFMG 分享服务</h2>"+
+						"<p>请使用完整的分享链接访问，例如 <code>/s/xxxxxxxx</code></p></body>")
+					return
+				}
+				http.NotFound(w, r)
+			}),
+			ReadHeaderTimeout: 20 * time.Second,
+		}
+		go func() {
+			logx.Infof("分享专用端口: http://%s", shareAddr)
+			if err := shareSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				logx.Errorf("分享端口异常退出: %v", err)
+			}
+		}()
+		defer func() { _ = shareSrv.Close() }()
+	}
 
 	go func() {
 		var err error

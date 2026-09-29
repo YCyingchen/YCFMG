@@ -13,8 +13,10 @@ import (
 
 // Server 服务端监听与外部访问设置。
 type Server struct {
-	Host       string
-	Port       int
+	Host string
+	Port int
+	// SharePort 分享专用端口；0 表示关闭（分享页与主站共用端口）
+	SharePort  int
 	BasePath   string
 	PublicURLs []string
 	TrustProxy bool
@@ -185,6 +187,7 @@ func (c *Config) apply(m map[string]any) {
 	if s, ok := asMap(m["server"]); ok {
 		c.Server.Host = str(s["host"], c.Server.Host)
 		c.Server.Port = num(s["port"], c.Server.Port)
+		c.Server.SharePort = num(s["share_port"], c.Server.SharePort)
 		c.Server.BasePath = str(s["base_path"], c.Server.BasePath)
 		c.Server.TrustProxy = boolean(s["trust_proxy"], c.Server.TrustProxy)
 		c.Server.TLSCert = str(s["tls_cert"], c.Server.TLSCert)
@@ -267,6 +270,11 @@ func (c *Config) applyEnv() {
 	if v := os.Getenv("YCFMG_PORT"); v != "" {
 		if n, err := strconv.Atoi(v); err == nil {
 			c.Server.Port = n
+		}
+	}
+	if v := os.Getenv("YCFMG_SHARE_PORT"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			c.Server.SharePort = n
 		}
 	}
 	if v := os.Getenv("YCFMG_BASE_PATH"); v != "" {
